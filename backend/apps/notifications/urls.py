@@ -1,6 +1,12 @@
-"""notifications API URLs - TODO: implement viewsets."""
-from django.urls import path
+"""Notifications API URLs."""
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from apps.notifications.views import NotificationViewSet
+
+router = DefaultRouter()
+router.register("", NotificationViewSet, basename="notification")
 
 urlpatterns = [
-    # TODO: add viewset routes
+    path("", include(router.urls)),
 ]
