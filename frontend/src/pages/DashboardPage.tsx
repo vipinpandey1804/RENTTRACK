@@ -1,25 +1,85 @@
+import { Link } from 'react-router-dom';
+import AppShell from '@/components/layout/AppShell';
+import { useProperties } from '@/hooks/useProperties';
 import { useAuthStore } from '@/store/auth';
 
 export default function DashboardPage() {
-  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
+  const { data: properties, isLoading } = useProperties();
+
+  const totalUnits = properties?.results.reduce((sum, p) => sum + p.unit_count, 0) ?? 0;
+  const occupiedUnits = properties?.results.reduce((sum, p) => sum + p.occupied_count, 0) ?? 0;
+  const vacantUnits = totalUnits - occupiedUnits;
 
   return (
-    <div className="min-h-screen">
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-brand-900">RentTrack</h1>
-        <button
-          onClick={logout}
-          className="text-sm text-gray-600 hover:text-gray-900"
-        >
-          Sign out
-        </button>
-      </header>
-      <main className="p-6 max-w-7xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-4">Dashboard</h2>
-        <p className="text-gray-500">
-          TODO: properties summary, outstanding dues, recent activity.
-        </p>
-      </main>
-    </div>
+    <AppShell>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Welcome back{user?.first_name ? `, ${user.first_name}` : ''}
+        </h1>
+        <p className="text-gray-500 mt-1">Here's an overview of your portfolio.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {[
+          { label: 'Properties', value: properties?.count ?? 0, href: '/properties' },
+          { label: 'Total units', value: totalUnits, href: '/properties' },
+          { label: 'Vacant units', value: vacantUnits, href: '/properties' },
+        ].map(({ label, value, href }) => (
+          <Link
+            key={label}
+            to={href}
+            className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow"
+          >
+            <p className="text-sm text-gray-500">{label}</p>
+            {isLoading ? (
+              <div className="h-8 w-16 bg-gray-100 animate-pulse rounded mt-1" />
+            ) : (
+              <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {!isLoading && properties && properties.results.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-900">Recent properties</h2>
+            <Link to="/properties" className="text-sm text-blue-700 hover:underline">
+              View all
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {properties.results.slice(0, 5).map((p) => (
+              <Link
+                key={p.id}
+                to={`/properties/${p.id}`}
+                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{p.name}</p>
+                  <p className="text-xs text-gray-500">{p.city}, {p.state}</p>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {p.occupied_count}/{p.unit_count} occupied
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isLoading && properties?.count === 0 && (
+        <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
+          <p className="text-gray-500 mb-4">No properties yet. Start by adding your first property.</p>
+          <Link
+            to="/properties"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-700 text-white text-sm font-medium hover:bg-blue-800 transition-colors"
+          >
+            Go to Properties
+          </Link>
+        </div>
+      )}
+    </AppShell>
   );
 }

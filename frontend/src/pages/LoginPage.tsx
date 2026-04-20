@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
 
 export default function LoginPage() {
@@ -59,6 +59,12 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don't have an account?{' '}
+          <Link to="/signup" className="font-medium text-blue-700 hover:underline">
+            Create one
+          </Link>
+        </p>
       </div>
     </div>
   );
