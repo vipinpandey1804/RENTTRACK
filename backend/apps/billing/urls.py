@@ -1,6 +1,12 @@
-"""billing API URLs - TODO: implement viewsets."""
-from django.urls import path
+"""Billing API URLs."""
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from apps.billing.views import BillViewSet
+
+router = DefaultRouter()
+router.register("bills", BillViewSet, basename="bill")
 
 urlpatterns = [
-    # TODO: add viewset routes
+    path("", include(router.urls)),
 ]

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/auth';
 const nav = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/properties', label: 'Properties' },
+  { to: '/billing', label: 'Billing' },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
