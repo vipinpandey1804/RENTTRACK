@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["migrations", "venv", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ"]
+ignore = ["E501"]  # line-too-long handled by formatter
+
+[tool.ruff.lint.per-file-ignores]
+"**/settings/*.py" = ["F401", "F403", "F405"]
+"**/migrations/*.py" = ["E", "F", "W", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+plugins = ["mypy_django_plugin.main"]
+ignore_missing_imports = true
+check_untyped_defs = true
+exclude = ["migrations", "venv"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"

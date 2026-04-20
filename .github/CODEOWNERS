@@ -1,0 +1,15 @@
+# Default owner for everything
+*                   @vipinpandey1804
+
+# Backend
+/backend/           @vipinpandey1804
+
+# Frontend
+/frontend/          @vipinpandey1804
+
+# Infra & CI
+/.github/           @vipinpandey1804
+/docker/            @vipinpandey1804
+
+# Docs
+/docs/              @vipinpandey1804
