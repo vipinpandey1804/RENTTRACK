@@ -1,13 +1,16 @@
 """
-Accounts: Users, Organizations, and Memberships.
+Accounts: Users, Organizations, Memberships, and Invites.
 
 A single User can belong to multiple Organizations (e.g., a PMC employee
 working for multiple property owners). Each membership carries a Role.
 """
+import secrets
 import uuid
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.core.models import TimeStampedModel, UUIDModel
@@ -145,3 +148,58 @@ class Membership(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.user.email} @ {self.organization.name} ({self.role})"
+
+
+class Invite(UUIDModel, TimeStampedModel):
+    """
+    Token-based invitation for a new or existing user to join an organization.
+
+    Flow: owner creates Invite → email sent with link → tenant follows link
+    → AcceptInviteView creates User + Membership, marks invite accepted.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        EXPIRED = "expired", "Expired"
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="invites"
+    )
+    invited_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="sent_invites"
+    )
+    email = models.EmailField()
+    role = models.CharField(max_length=32, choices=Membership.Role.choices)
+    token = models.CharField(max_length=64, unique=True, editable=False)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    # Pre-assigned unit (optional — landlord may assign unit at invite time)
+    unit = models.ForeignKey(
+        "properties.Unit",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="invites",
+    )
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        db_table = "invites"
+        indexes = [
+            models.Index(fields=["token"]),
+            models.Index(fields=["email", "organization"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = secrets.token_urlsafe(48)
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=7)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_valid(self):
+        return self.status == self.Status.PENDING and timezone.now() < self.expires_at
+
+    def __str__(self):
+        return f"Invite({self.email} → {self.organization.name})"

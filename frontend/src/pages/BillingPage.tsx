@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import AppShell from '@/components/layout/AppShell';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { toast } from '@/components/ui/Toast';
-import { useBills, useGenerateBill } from '@/hooks/useBilling';
+import { useBills, useGenerateBill, type BillFilters } from '@/hooks/useBilling';
 import { useLeases } from '@/hooks/useProperties';
 import type { Bill, BillStatus } from '@/types/billing';
 
@@ -17,7 +17,19 @@ const STATUS_TABS: { label: string; value: BillStatus | '' }[] = [
   { label: 'Overdue', value: 'overdue' },
   { label: 'Paid', value: 'paid' },
   { label: 'Partial', value: 'partially_paid' },
+  { label: 'Draft', value: 'draft' },
 ];
+
+const PAGE_SIZE = 25;
+
+function useDebounce<T>(value: T, delay = 400): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
 
 function BillRow({ bill }: { bill: Bill }) {
   const isDue = bill.status === 'overdue';
@@ -111,10 +123,125 @@ function GenerateBillModal({ open, onClose }: { open: boolean; onClose: () => vo
   );
 }
 
+function Pagination({
+  page,
+  totalCount,
+  pageSize,
+  onChange,
+}: {
+  page: number;
+  totalCount: number;
+  pageSize: number;
+  onChange: (p: number) => void;
+}) {
+  const totalPages = Math.ceil(totalCount / pageSize);
+  if (totalPages <= 1) return null;
+
+  const pages: (number | '…')[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push('…');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+      pages.push(i);
+    }
+    if (page < totalPages - 2) pages.push('…');
+    pages.push(totalPages);
+  }
+
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+      <p className="text-sm text-gray-500">
+        Showing {Math.min((page - 1) * pageSize + 1, totalCount)}–{Math.min(page * pageSize, totalCount)} of {totalCount}
+      </p>
+      <div className="flex gap-1">
+        <button
+          onClick={() => onChange(page - 1)}
+          disabled={page === 1}
+          className="px-3 py-1 text-sm rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+        >
+          Prev
+        </button>
+        {pages.map((p, i) =>
+          p === '…' ? (
+            <span key={`ellipsis-${i}`} className="px-2 py-1 text-sm text-gray-400">…</span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onChange(p as number)}
+              className={`px-3 py-1 text-sm rounded border ${
+                p === page
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {p}
+            </button>
+          )
+        )}
+        <button
+          onClick={() => onChange(page + 1)}
+          disabled={page === totalPages}
+          className="px-3 py-1 text-sm rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function BillingPage() {
-  const [activeStatus, setActiveStatus] = useState<BillStatus | ''>('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeStatus = (searchParams.get('status') ?? '') as BillStatus | '';
+  const searchInput = searchParams.get('search') ?? '';
+  const dueDateGte = searchParams.get('due_date__gte') ?? '';
+  const dueDateLte = searchParams.get('due_date__lte') ?? '';
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+
+  const [localSearch, setLocalSearch] = useState(searchInput);
+  const debouncedSearch = useDebounce(localSearch, 400);
+
   const [showGenerate, setShowGenerate] = useState(false);
-  const { data, isLoading, isError } = useBills(activeStatus ? { status: activeStatus } : {});
+
+  const updateParam = useCallback(
+    (updates: Record<string, string>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(updates).forEach(([k, v]) => {
+          if (v) next.set(k, v);
+          else next.delete(k);
+        });
+        next.set('page', '1');
+        return next;
+      });
+    },
+    [setSearchParams],
+  );
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (debouncedSearch) next.set('search', debouncedSearch);
+      else next.delete('search');
+      next.set('page', '1');
+      return next;
+    });
+  }, [debouncedSearch, setSearchParams]);
+
+  const filters: BillFilters = {
+    ...(activeStatus && { status: activeStatus }),
+    ...(debouncedSearch && { search: debouncedSearch }),
+    ...(dueDateGte && { due_date__gte: dueDateGte }),
+    ...(dueDateLte && { due_date__lte: dueDateLte }),
+    page,
+    page_size: PAGE_SIZE,
+  };
+
+  const { data, isLoading, isError } = useBills(filters);
 
   return (
     <AppShell>
@@ -131,7 +258,7 @@ export default function BillingPage() {
         {STATUS_TABS.map(({ label, value }) => (
           <button
             key={value}
-            onClick={() => setActiveStatus(value)}
+            onClick={() => updateParam({ status: value })}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeStatus === value
                 ? 'border-blue-600 text-blue-700'
@@ -143,6 +270,48 @@ export default function BillingPage() {
         ))}
       </div>
 
+      {/* Search + date range filters */}
+      <div className="flex flex-wrap gap-3 mb-4">
+        <div className="flex-1 min-w-48">
+          <input
+            type="search"
+            placeholder="Search tenant, bill number…"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 whitespace-nowrap">Due from</label>
+          <input
+            type="date"
+            value={dueDateGte}
+            onChange={(e) => updateParam({ due_date__gte: e.target.value })}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 whitespace-nowrap">to</label>
+          <input
+            type="date"
+            value={dueDateLte}
+            onChange={(e) => updateParam({ due_date__lte: e.target.value })}
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        {(activeStatus || debouncedSearch || dueDateGte || dueDateLte) && (
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setLocalSearch('');
+              setSearchParams({});
+            }}
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+
       {isError && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-6 text-sm text-red-700 text-center">
           Failed to load bills. Please refresh.
@@ -151,8 +320,10 @@ export default function BillingPage() {
 
       {!isLoading && !isError && data?.results.length === 0 && (
         <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-          <p className="text-gray-500 mb-4">No bills yet</p>
-          <Button onClick={() => setShowGenerate(true)}>Generate first bill</Button>
+          <p className="text-gray-500 mb-4">No bills found</p>
+          {!activeStatus && !debouncedSearch && !dueDateGte && !dueDateLte && (
+            <Button onClick={() => setShowGenerate(true)}>Generate first bill</Button>
+          )}
         </div>
       )}
 
@@ -185,6 +356,18 @@ export default function BillingPage() {
                 : data?.results.map((b) => <BillRow key={b.id} bill={b} />)}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            totalCount={data?.count ?? 0}
+            pageSize={PAGE_SIZE}
+            onChange={(p) =>
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev);
+                next.set('page', String(p));
+                return next;
+              })
+            }
+          />
         </div>
       )}
 

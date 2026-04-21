@@ -48,6 +48,14 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         if bill_type:
             qs = qs.filter(bill_type=bill_type)
 
+        due_date_gte = self.request.query_params.get("due_date__gte")
+        if due_date_gte:
+            qs = qs.filter(due_date__gte=due_date_gte)
+
+        due_date_lte = self.request.query_params.get("due_date__lte")
+        if due_date_lte:
+            qs = qs.filter(due_date__lte=due_date_lte)
+
         return qs
 
     @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager])

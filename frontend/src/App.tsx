@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import DashboardPage from '@/pages/DashboardPage';
+import TenantDashboardPage from '@/pages/TenantDashboardPage';
 import PropertiesPage from '@/pages/PropertiesPage';
 import PropertyDetailPage from '@/pages/PropertyDetailPage';
 import BillingPage from '@/pages/BillingPage';
@@ -13,6 +14,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function SmartDashboard() {
+  const user = useAuthStore((s) => s.user);
+  const role = user?.active_organization
+    ? user.memberships.find((m) => m.organization.id === user.active_organization?.id)?.role
+    : null;
+
+  if (role === 'tenant' || role === 'co_tenant') {
+    return <TenantDashboardPage />;
+  }
+  return <DashboardPage />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -22,7 +35,7 @@ export default function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <SmartDashboard />
           </ProtectedRoute>
         }
       />
