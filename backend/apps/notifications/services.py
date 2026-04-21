@@ -20,6 +20,7 @@ BILL_OVERDUE = "bill.overdue"
 PAYMENT_RECEIVED = "payment.received"
 INVITE_SENT = "invite.sent"
 WELCOME = "user.welcome"
+EMAIL_VERIFICATION = "user.email_verification"
 
 
 def _create_notification(
@@ -98,6 +99,62 @@ def notify_bill_issued_sync(bill) -> Notification | None:
     )
     send_email(notification)
     return notification
+
+
+def send_verification_email(user, verification_url: str) -> bool:
+    """Send an email-verification link to the newly registered user."""
+    subject = "Verify your RentTrack email address"
+    body = (
+        f"Hi {user.first_name or user.email},\n\n"
+        f"Please verify your email address by clicking the link below:\n\n"
+        f"{verification_url}\n\n"
+        f"This link expires in 24 hours.\n\n"
+        f"If you did not sign up for RentTrack, you can safely ignore this email.\n\n"
+        f"— RentTrack"
+    )
+    notification = _create_notification(
+        organization=user.active_organization,
+        recipient=user,
+        channel=Notification.Channel.EMAIL,
+        event_type=EMAIL_VERIFICATION,
+        subject=subject,
+        body=body,
+        payload={"user_id": str(user.id)},
+    )
+    return send_email(notification)
+
+
+def send_invite_email(invite, invite_url: str) -> bool:
+    """Send an invite email to the invited address."""
+    subject = f"You've been invited to join {invite.organization.name} on RentTrack"
+    inviter = invite.invited_by
+    inviter_name = (
+        f"{inviter.first_name} {inviter.last_name}".strip() if inviter else "Your landlord"
+    )
+    body = (
+        f"Hi,\n\n"
+        f"{inviter_name} has invited you to join {invite.organization.name} on RentTrack "
+        f"as {invite.get_role_display()}.\n\n"
+        f"Click the link below to accept the invitation and create your account:\n\n"
+        f"{invite_url}\n\n"
+        f"This invitation expires in 7 days.\n\n"
+        f"— RentTrack"
+    )
+    from django.core.mail import send_mail
+
+    try:
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@renttrack.app")
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=from_email,
+            recipient_list=[invite.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as exc:
+        logger.exception("Invite email failed for invite %s: %s", invite.id, exc)
+        return False
 
 
 def notify_payment_received_sync(payment) -> Notification | None:

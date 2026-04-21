@@ -3,22 +3,31 @@ import { api } from '@/lib/api';
 import type { Bill, RecordPaymentPayload } from '@/types/billing';
 import type { PaginatedResponse } from '@/types';
 
-interface BillFilters {
+export interface BillFilters {
   status?: string;
   lease?: string;
   bill_type?: string;
   ordering?: string;
+  search?: string;
+  due_date__gte?: string;
+  due_date__lte?: string;
+  page?: number;
+  page_size?: number;
 }
 
 export function useBills(filters: BillFilters = {}) {
   return useQuery({
     queryKey: ['bills', filters],
     queryFn: async () => {
-      const params = new URLSearchParams(
-        Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) as Record<string, string>,
-      ).toString();
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') {
+          params.set(k, String(v));
+        }
+      });
+      const qs = params.toString();
       const { data } = await api.get<PaginatedResponse<Bill>>(
-        `/billing/bills/${params ? `?${params}` : ''}`,
+        `/billing/bills/${qs ? `?${qs}` : ''}`,
       );
       return data;
     },

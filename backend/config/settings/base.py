@@ -190,6 +190,9 @@ CACHES = {
     }
 }
 
+# ===== Frontend URL (used in email links) =====
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+
 # ===== API Docs =====
 SPECTACULAR_SETTINGS = {
     "TITLE": "RentTrack API",

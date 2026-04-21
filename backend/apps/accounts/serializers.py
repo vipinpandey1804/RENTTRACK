@@ -93,11 +93,39 @@ class SignupSerializer(serializers.Serializer):
 class InviteSerializer(serializers.Serializer):
     email = serializers.EmailField()
     role = serializers.ChoiceField(choices=Membership.Role.choices)
+    unit_id = serializers.UUIDField(required=False, allow_null=True)
 
     def validate_role(self, value):
         if value == Membership.Role.OWNER:
             raise serializers.ValidationError("Cannot invite users as owners.")
         return value
+
+
+class AcceptInviteSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    first_name = serializers.CharField(max_length=150, required=False, default="")
+    last_name = serializers.CharField(max_length=150, required=False, default="")
+    password = serializers.CharField(write_only=True, min_length=10, required=False)
+
+    def validate(self, attrs):
+        from apps.accounts.models import User
+
+        # Password is required only if the user does not already exist
+        email_from_token = self._get_email_for_token(attrs.get("token", ""))
+        if email_from_token:
+            if not User.objects.filter(email=email_from_token).exists():
+                if not attrs.get("password"):
+                    raise serializers.ValidationError(
+                        {"password": "Password is required for new accounts."}
+                    )
+                validate_password(attrs["password"])
+        return attrs
+
+    def _get_email_for_token(self, token: str) -> str | None:
+        from apps.accounts.models import Invite
+
+        invite = Invite.objects.filter(token=token).first()
+        return invite.email if invite else None
 
 
 class ChangePasswordSerializer(serializers.Serializer):

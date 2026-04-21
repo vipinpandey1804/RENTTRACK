@@ -113,6 +113,23 @@ class LeaseViewSet(OrgScopedMixin, viewsets.ModelViewSet):
                 {"detail": "Only draft leases can be activated."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Prevent double-booking: no other ACTIVE lease may exist for the same unit
+        conflict = Lease.objects.filter(
+            unit=lease.unit,
+            status=Lease.Status.ACTIVE,
+        ).exclude(pk=lease.pk).first()
+        if conflict:
+            return Response(
+                {
+                    "detail": (
+                        f"Unit already has an active lease (tenant: {conflict.tenant.email}). "
+                        "Terminate or end the existing lease before activating a new one."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         lease.status = Lease.Status.ACTIVE
         lease.save(update_fields=["status"])
         lease.unit.status = Unit.Status.OCCUPIED
