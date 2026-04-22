@@ -7,6 +7,8 @@ import PropertiesPage from '@/pages/PropertiesPage';
 import PropertyDetailPage from '@/pages/PropertyDetailPage';
 import BillingPage from '@/pages/BillingPage';
 import BillDetailPage from '@/pages/BillDetailPage';
+import VerifyEmailPage from '@/pages/VerifyEmailPage';
+import AcceptInvitePage from '@/pages/AcceptInvitePage';
 import { useAuthStore } from '@/store/auth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -71,6 +73,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+      <Route path="/accept-invite/:token" element={<AcceptInvitePage />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

@@ -21,6 +21,7 @@ class PropertySerializer(serializers.ModelSerializer):
             "postal_code",
             "country",
             "electricity_rate_per_unit",
+            "cover_image",
             "unit_count",
             "occupied_count",
             "created_at",

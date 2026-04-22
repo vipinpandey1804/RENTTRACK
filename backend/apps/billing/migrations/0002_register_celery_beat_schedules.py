@@ -65,6 +65,7 @@ def deregister_schedules(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
+        ("billing", "0001_initial"),
         ("django_celery_beat", "0018_improve_crontab_helptext"),
     ]
 

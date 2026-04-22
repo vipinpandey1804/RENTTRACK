@@ -37,7 +37,16 @@ export function usePropertyUnits(propertyId: string) {
 export function useCreateProperty() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: Partial<Property>) => api.post('/properties/', payload).then((r) => r.data),
+    mutationFn: (payload: Partial<Property> & { cover_image_file?: File }) => {
+      const { cover_image_file, ...rest } = payload;
+      if (cover_image_file) {
+        const fd = new FormData();
+        Object.entries(rest).forEach(([k, v]) => v != null && fd.append(k, String(v)));
+        fd.append('cover_image', cover_image_file);
+        return api.post('/properties/', fd, { headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data);
+      }
+      return api.post('/properties/', rest).then((r) => r.data);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['properties'] }),
   });
 }

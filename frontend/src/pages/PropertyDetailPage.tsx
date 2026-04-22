@@ -10,22 +10,33 @@ import { useProperty, usePropertyUnits, useCreateUnit } from '@/hooks/usePropert
 import type { Unit } from '@/types';
 
 const statusColors: Record<Unit['status'], string> = {
-  vacant: 'bg-green-100 text-green-700',
+  vacant: 'bg-emerald-100 text-emerald-700',
   occupied: 'bg-blue-100 text-blue-700',
-  maintenance: 'bg-yellow-100 text-yellow-700',
+  maintenance: 'bg-amber-100 text-amber-700',
+};
+
+const statusDots: Record<Unit['status'], string> = {
+  vacant: 'bg-emerald-500',
+  occupied: 'bg-blue-500',
+  maintenance: 'bg-amber-500',
 };
 
 function UnitRow({ unit }: { unit: Unit }) {
   return (
-    <tr className="border-b border-gray-100 hover:bg-gray-50">
-      <td className="py-3 px-4 text-sm font-medium text-gray-900">{unit.name}</td>
-      <td className="py-3 px-4 text-sm text-gray-600">{unit.floor ?? '—'}</td>
-      <td className="py-3 px-4 text-sm text-gray-600">{unit.bedrooms ?? '—'}</td>
-      <td className="py-3 px-4 text-sm text-gray-600">
+    <tr className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
+      <td className="py-3.5 px-5">
+        <div className="flex items-center gap-2">
+          <div className={`h-2 w-2 rounded-full ${statusDots[unit.status]}`} />
+          <span className="text-sm font-semibold text-gray-900">{unit.name}</span>
+        </div>
+      </td>
+      <td className="py-3.5 px-5 text-sm text-gray-500">{unit.floor ?? '—'}</td>
+      <td className="py-3.5 px-5 text-sm text-gray-500">{unit.bedrooms ?? '—'}</td>
+      <td className="py-3.5 px-5 text-sm font-medium text-gray-900">
         ₹{Number(unit.base_rent).toLocaleString('en-IN')}
       </td>
-      <td className="py-3 px-4">
-        <span className={`text-xs font-medium px-2 py-1 rounded-full capitalize ${statusColors[unit.status]}`}>
+      <td className="py-3.5 px-5">
+        <span className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${statusColors[unit.status]}`}>
           {unit.status}
         </span>
       </td>
@@ -114,6 +125,8 @@ function AddUnitModal({
   );
 }
 
+const PLACEHOLDER_GRADIENT = 'from-blue-400 to-indigo-500';
+
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [showAddUnit, setShowAddUnit] = useState(false);
@@ -124,7 +137,8 @@ export default function PropertyDetailPage() {
     return (
       <AppShell>
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
+          <div className="h-56 rounded-2xl bg-gray-200" />
+          <div className="h-6 bg-gray-200 rounded w-48" />
           <div className="h-4 bg-gray-100 rounded w-80" />
         </div>
       </AppShell>
@@ -139,70 +153,108 @@ export default function PropertyDetailPage() {
     );
   }
 
+  const vacant = property.unit_count - property.occupied_count;
+
   return (
     <AppShell>
-      <div className="mb-1">
-        <Link to="/properties" className="text-sm text-gray-500 hover:text-gray-700">
-          ← Properties
+      {/* Breadcrumb */}
+      <div className="mb-4">
+        <Link
+          to="/properties"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+        >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Properties
         </Link>
       </div>
-      <div className="flex items-start justify-between mb-6 mt-2">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{property.name}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {property.address_line1}
-            {property.address_line2 ? `, ${property.address_line2}` : ''},{' '}
-            {property.city}, {property.state} {property.postal_code}
-          </p>
+
+      {/* Hero image */}
+      <div className="relative h-56 rounded-2xl overflow-hidden mb-6 shadow-sm">
+        {property.cover_image ? (
+          <img src={property.cover_image} alt={property.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className={`w-full h-full bg-gradient-to-br ${PLACEHOLDER_GRADIENT} flex items-center justify-center`}>
+            <svg className="h-20 w-20 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+        )}
+        {/* Overlay gradient for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-1">{property.name}</h1>
+              <p className="text-sm text-white/80">
+                {property.address_line1}
+                {property.address_line2 ? `, ${property.address_line2}` : ''},{' '}
+                {property.city}, {property.state} {property.postal_code}
+              </p>
+            </div>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white border border-white/30 capitalize">
+              {property.property_type}
+            </span>
+          </div>
         </div>
-        <span className="text-sm font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600 capitalize">
-          {property.property_type}
-        </span>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { label: 'Total units', value: property.unit_count },
-          { label: 'Occupied', value: property.occupied_count },
-          { label: 'Vacant', value: property.unit_count - property.occupied_count },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          { label: 'Total units', value: property.unit_count, color: 'text-gray-900', bg: 'bg-white' },
+          { label: 'Occupied', value: property.occupied_count, color: 'text-blue-700', bg: 'bg-blue-50' },
+          { label: 'Vacant', value: vacant, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} className={`${bg} rounded-2xl border border-gray-100 p-5 shadow-sm`}>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{label}</p>
+            <p className={`text-3xl font-bold ${color}`}>{value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <h2 className="font-semibold text-gray-900">Units</h2>
+      {/* Units table */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 className="font-bold text-gray-900">Units</h2>
           <Button size="sm" onClick={() => setShowAddUnit(true)}>
             + Add unit
           </Button>
         </div>
 
         {unitsLoading ? (
-          <div className="p-8 text-center text-sm text-gray-400">Loading units…</div>
+          <div className="p-10 text-center text-sm text-gray-400">Loading units…</div>
         ) : units && units.length > 0 ? (
-          <table className="w-full">
-            <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
-              <tr>
-                <th className="py-2 px-4 text-left font-medium">Unit</th>
-                <th className="py-2 px-4 text-left font-medium">Floor</th>
-                <th className="py-2 px-4 text-left font-medium">Beds</th>
-                <th className="py-2 px-4 text-left font-medium">Rent</th>
-                <th className="py-2 px-4 text-left font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {units.map((u) => (
-                <UnitRow key={u.id} unit={u} />
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50/80 text-xs text-gray-500 uppercase tracking-wider">
+                <tr>
+                  <th className="py-3 px-5 text-left font-semibold">Unit</th>
+                  <th className="py-3 px-5 text-left font-semibold">Floor</th>
+                  <th className="py-3 px-5 text-left font-semibold">Beds</th>
+                  <th className="py-3 px-5 text-left font-semibold">Rent</th>
+                  <th className="py-3 px-5 text-left font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {units.map((u) => (
+                  <UnitRow key={u.id} unit={u} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div className="p-8 text-center">
-            <p className="text-gray-500 text-sm mb-3">No units yet</p>
+          <div className="p-12 text-center">
+            <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
+              <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <p className="font-medium text-gray-900 mb-1">No units yet</p>
+            <p className="text-sm text-gray-400 mb-4">Add units to start assigning tenants</p>
             <Button size="sm" onClick={() => setShowAddUnit(true)}>
               Add first unit
             </Button>
