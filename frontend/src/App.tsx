@@ -7,6 +7,7 @@ import PropertiesPage from '@/pages/PropertiesPage';
 import PropertyDetailPage from '@/pages/PropertyDetailPage';
 import BillingPage from '@/pages/BillingPage';
 import BillDetailPage from '@/pages/BillDetailPage';
+import ProfilePage from '@/pages/ProfilePage';
 import { useAuthStore } from '@/store/auth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -68,6 +69,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <BillDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
