@@ -9,7 +9,7 @@ from apps.accounts.permissions import IsOrgMember, IsOrgOwnerOrManager
 from apps.billing.models import Bill, BillLineItem
 from apps.billing.serializers import BillSerializer, GenerateBillSerializer, RecordPaymentSerializer
 from apps.billing.services import apply_payment, generate_rent_bill
-from apps.notifications.tasks import notify_bill_issued
+from django_q.tasks import async_task
 from apps.properties.models import Lease
 
 
@@ -73,7 +73,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         bill = generate_rent_bill(lease, serializer.validated_data["period_date"])
-        notify_bill_issued.delay(str(bill.id))
+        async_task("apps.notifications.tasks.notify_bill_issued", str(bill.id))
         return Response(BillSerializer(bill).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager])

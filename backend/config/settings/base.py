@@ -40,7 +40,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django_filters",
     "drf_spectacular",
-    "django_celery_beat",
+    "django_q",
     "phonenumber_field",
 ]
 
@@ -170,14 +170,19 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
 
-# ===== Celery =====
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=env("REDIS_URL"))
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=env("REDIS_URL"))
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TIMEZONE = TIME_ZONE
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# ===== Django Q =====
+Q_CLUSTER = {
+    "name": "renttrack",
+    "workers": 4,
+    "recycle": 500,
+    "timeout": 60,
+    "retry": 120,
+    "compress": True,
+    "save_limit": 250,
+    "queue_limit": 500,
+    "label": "Django Q",
+    "orm": "default",
+}
 
 # ===== Cache =====
 CACHES = {
