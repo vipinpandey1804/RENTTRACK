@@ -1,6 +1,5 @@
 """Production settings — extends base."""
 import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *  # noqa: F401, F403
@@ -51,7 +50,7 @@ if env.bool("USE_S3", default=False):
 if env("SENTRY_DSN", default=None):
     sentry_sdk.init(
         dsn=env("SENTRY_DSN"),
-        integrations=[DjangoIntegration(), CeleryIntegration()],
+        integrations=[DjangoIntegration()],
         traces_sample_rate=0.1,
         send_default_pii=False,
         environment=env("ENVIRONMENT", default="production"),

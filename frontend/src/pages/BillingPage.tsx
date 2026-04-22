@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import AppShell from '@/components/layout/AppShell';
@@ -203,6 +203,8 @@ export default function BillingPage() {
 
   const [localSearch, setLocalSearch] = useState(searchInput);
   const debouncedSearch = useDebounce(localSearch, 400);
+  const prevDebounced = useRef(debouncedSearch);
+  const isClearing = useRef(false);
 
   const [showGenerate, setShowGenerate] = useState(false);
 
@@ -221,8 +223,10 @@ export default function BillingPage() {
     [setSearchParams],
   );
 
-  // Sync debounced search to URL
+  // Sync debounced search to URL only when it actually changes and not during a clear
   useEffect(() => {
+    if (isClearing.current || debouncedSearch === prevDebounced.current) return;
+    prevDebounced.current = debouncedSearch;
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       if (debouncedSearch) next.set('search', debouncedSearch);
@@ -303,8 +307,12 @@ export default function BillingPage() {
           <Button
             variant="secondary"
             onClick={() => {
+              isClearing.current = true;
+              prevDebounced.current = '';
               setLocalSearch('');
               setSearchParams({});
+              // Reset flag after debounce delay
+              setTimeout(() => { isClearing.current = false; }, 500);
             }}
           >
             Clear filters

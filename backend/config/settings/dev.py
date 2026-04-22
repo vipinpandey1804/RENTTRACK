@@ -6,6 +6,18 @@ DEBUG = True
 
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
+# ===== Cache (local memory for dev) =====
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "renttrack-dev",
+    }
+}
+
+# ===== DRF (disable throttling for dev) =====
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {}
+
 # ===== Email backend (Mailhog for local dev) =====
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST", default="localhost")

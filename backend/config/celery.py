@@ -1,15 +1,2 @@
-"""Celery application for async tasks and scheduled jobs."""
-import os
-
-from celery import Celery
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
-
-app = Celery("renttrack")
-app.config_from_object("django.conf:settings", namespace="CELERY")
-app.autodiscover_tasks()
-
-
-@app.task(bind=True, ignore_result=True)
-def debug_task(self):
-    print(f"Request: {self.request!r}")
+# Celery has been replaced by Django Q2 (django-q2).
+# Run background workers with: python manage.py qcluster

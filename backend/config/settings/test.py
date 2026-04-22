@@ -13,8 +13,9 @@ DATABASES = {
 
 # Don't hit Redis in tests
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
+
+# Run Django Q tasks synchronously in tests
+Q_CLUSTER = {"sync": True, "orm": "default"}
 
 # Fast password hashing
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

@@ -126,9 +126,8 @@ def apply_payment(bill: Bill, amount: Decimal, method: str, recorded_by, referen
         bill.status = Bill.Status.PARTIALLY_PAID
     bill.save(update_fields=["amount_paid", "status"])
 
-    # Fire async notification (import here to avoid circular at module level)
-    from apps.notifications.tasks import notify_payment_received
-    notify_payment_received.delay(str(payment.id))
+    from django_q.tasks import async_task
+    async_task("apps.notifications.tasks.notify_payment_received", str(payment.id))
 
     return payment
 
