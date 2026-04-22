@@ -1,5 +1,5 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
 
 const nav = [
@@ -63,7 +63,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white border-b border-gray-100 shadow-sm px-6 py-0 flex items-stretch justify-between sticky top-0 z-20">
-        {/* Logo */}
+        {/* Logo + nav */}
         <div className="flex items-center gap-8 py-3">
           <Link to="/dashboard" className="flex items-center gap-2 group">
             <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm group-hover:bg-blue-700 transition-colors">
@@ -82,7 +82,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={to}
                   to={to}
-                  className={`flex items-center gap-1.5 px-3 py-0 text-sm font-medium transition-colors border-b-2 my-0 h-full ${
+                  className={`flex items-center gap-1.5 px-3 text-sm font-medium transition-colors border-b-2 h-full ${
                     active
                       ? 'text-blue-700 border-blue-600'
                       : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'
@@ -93,23 +93,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
-      <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link to="/dashboard" className="font-bold text-gray-900 text-lg">RentTrack</Link>
-          <nav className="flex items-center gap-1">
-            {nav.map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname.startsWith(to)
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
           </nav>
         </div>
 
@@ -120,8 +103,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {user.active_organization.name}
             </span>
           )}
-          <div className="relative group">
-            <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm">
                 {initials}
               </div>
@@ -129,45 +115,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 hidden group-hover:block z-10">
-              <div className="px-4 py-2.5 border-b border-gray-100">
-                <p className="text-sm font-medium text-gray-900 truncate">{fullName}</p>
-                <p className="text-xs text-gray-400 truncate">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 mt-0.5 flex items-center gap-2"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Sign out
-              </button>
-            </div>
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen((o) => !o)}
-              className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900"
-            >
-              <span className="h-8 w-8 rounded-full bg-blue-100 text-blue-700 font-semibold flex items-center justify-center text-xs">
-                {user?.first_name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'}
-              </span>
-            </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-10">
+                <div className="px-4 py-2.5 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-900 truncate">{fullName}</p>
+                  <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                </div>
                 <Link
                   to="/profile"
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 mt-0.5"
                 >
+                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                   Profile
                 </Link>
                 <hr className="my-1 border-gray-100" />
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
                   Sign out
                 </button>
               </div>

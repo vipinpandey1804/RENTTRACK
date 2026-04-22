@@ -40,20 +40,6 @@ export default function LoginPage() {
               </svg>
             </div>
             <span className="text-2xl font-bold text-gray-900">RentTrack</span>
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2">Sign in</h1>
-        <p className="text-gray-500 mb-6">Welcome to RentTrack</p>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none"
-            />
           </div>
           <p className="text-gray-500 text-sm">Sign in to manage your properties</p>
         </div>
@@ -121,4 +107,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
