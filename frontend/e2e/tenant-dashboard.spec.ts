@@ -44,7 +44,7 @@ test.describe('Tenant Dashboard — content', () => {
   test('shows active lease card', async ({ page }) => {
     await expect(page.getByText('Flat 3B')).toBeVisible();
     await expect(page.getByText('Sunrise Apts')).toBeVisible();
-    await expect(page.getByText(/₹15,000/)).toBeVisible();
+    await expect(page.getByRole('definition').filter({ hasText: '₹15,000' })).toBeVisible();
   });
 
   test('shows lease dates', async ({ page }) => {
@@ -52,20 +52,23 @@ test.describe('Tenant Dashboard — content', () => {
   });
 
   test('shows outstanding bills section heading', async ({ page }) => {
-    await expect(page.getByText(/outstanding bills/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /outstanding bills/i })).toBeVisible();
   });
 
   test('overdue bill appears in outstanding table', async ({ page }) => {
-    await expect(page.getByText('RT-2026-0003')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'RT-2026-0003' }).first()).toBeVisible();
   });
 
   test('issued bill appears in outstanding table', async ({ page }) => {
-    await expect(page.getByText('RT-2026-0001')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'RT-2026-0001' }).first()).toBeVisible();
   });
 
   test('paid bill does NOT appear in outstanding table', async ({ page }) => {
-    // RT-2026-0002 is paid, should not show in outstanding
-    await expect(page.getByText('RT-2026-0002')).not.toBeVisible({ timeout: 3000 });
+    // RT-2026-0002 is paid — the mock /billing/bills/ returns all 3 bills but the
+    // dashboard fetches issued+overdue separately; RT-2026-0002 won't be in those.
+    // Scope check to the outstanding table only.
+    const outstandingTable = page.locator('table').first();
+    await expect(outstandingTable.getByRole('link', { name: 'RT-2026-0002' })).not.toBeVisible({ timeout: 3000 });
   });
 
   test('shows View all bills link', async ({ page }) => {

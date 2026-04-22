@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
 
 export default function LoginPage() {
@@ -8,7 +8,10 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((s) => s.login);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const navigate = useNavigate();
+
+  if (accessToken) return <Navigate to="/dashboard" replace />;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +30,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2">RentTrack</h1>
-        <p className="text-gray-500 mb-6">Sign in to your account</p>
+        <h1 className="text-3xl font-bold text-brand-900 mb-2">Sign in</h1>
+        <p className="text-gray-500 mb-6">Welcome to RentTrack</p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>

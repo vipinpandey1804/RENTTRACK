@@ -4,18 +4,18 @@ import { mockApi, seedAuth, seedTenantAuth } from './helpers';
 test.describe('Login page', () => {
   test('renders login form', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /sign in|log in|welcome/i })).toBeVisible();
-    await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/password/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign in|log in/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /sign in/i })).toBeVisible();
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
   });
 
   test('shows error on bad credentials', async ({ page }) => {
     await mockApi(page, 'POST', '/auth/login/', { detail: 'No active account found with the given credentials' }, 401);
     await page.goto('/login');
-    await page.getByLabel(/email/i).fill('bad@test.com');
-    await page.getByLabel(/password/i).fill('wrongpassword');
-    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.locator('input[type="email"]').fill('bad@test.com');
+    await page.locator('input[type="password"]').fill('wrongpassword');
+    await page.getByRole('button', { name: /sign in/i }).click();
     await expect(page.getByText(/invalid|incorrect|no active account/i)).toBeVisible({ timeout: 5000 });
   });
 
