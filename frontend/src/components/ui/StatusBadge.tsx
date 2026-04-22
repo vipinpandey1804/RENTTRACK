@@ -1,5 +1,3 @@
-import type { BillStatus } from '@/types/billing';
-
 const configs: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-gray-100 text-gray-600' },
   issued: { label: 'Issued', className: 'bg-blue-100 text-blue-700' },

@@ -40,6 +40,7 @@ export interface Property {
   postal_code: string;
   country: string;
   electricity_rate_per_unit: string;
+  cover_image: string | null;
   unit_count: number;
   occupied_count: number;
   created_at: string;

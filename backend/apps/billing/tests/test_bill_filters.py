@@ -65,11 +65,15 @@ def make_bill(org, lease, bill_number, due_date, status=Bill.Status.ISSUED):
         due_date=due_date,
         subtotal="10000.00",
         total_amount="10000.00",
-        balance_due="10000.00",
         status=status,
     )
     BillLineItem.objects.create(
-        bill=bill, description="Rent", quantity=1, unit_price="10000.00",
+        organization=org,
+        bill=bill,
+        description="Rent",
+        quantity=1,
+        unit_price="10000.00",
+        amount="10000.00",
     )
     return bill
 

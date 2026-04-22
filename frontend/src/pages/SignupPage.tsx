@@ -44,14 +44,24 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">RentTrack</h1>
-          <p className="mt-1 text-gray-500">Create your landlord account</p>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2.5 mb-2">
+            <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md">
+              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">RentTrack</span>
+          </div>
+          <p className="text-gray-500 text-sm">Create your landlord account</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-white/60 p-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Get started for free</h2>
           <form onSubmit={onSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -114,7 +124,7 @@ export default function SignupPage() {
 
           <p className="mt-6 text-center text-sm text-gray-500">
             Already have an account?{' '}
-            <Link to="/login" className="font-medium text-blue-700 hover:underline">
+            <Link to="/login" className="font-semibold text-blue-600 hover:underline">
               Sign in
             </Link>
           </p>

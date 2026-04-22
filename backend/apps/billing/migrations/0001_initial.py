@@ -6,66 +6,92 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('accounts', '__first__'),
-        ('properties', '__first__'),
+        ("accounts", "__first__"),
+        ("properties", "__first__"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Bill',
+            name="Bill",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('bill_number', models.CharField(max_length=50, unique=True)),
-                ('bill_type', models.CharField(choices=[('rent', 'Rent'), ('electricity', 'Electricity'), ('water', 'Water'), ('maintenance', 'Maintenance'), ('combined', 'Combined')], max_length=20)),
-                ('period_start', models.DateField()),
-                ('period_end', models.DateField()),
-                ('issue_date', models.DateField()),
-                ('due_date', models.DateField(db_index=True)),
-                ('subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('tax_amount', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('total_amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('amount_paid', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('status', models.CharField(choices=[('draft', 'Draft'), ('issued', 'Issued'), ('paid', 'Paid'), ('partially_paid', 'Partially Paid'), ('overdue', 'Overdue'), ('cancelled', 'Cancelled')], db_index=True, default='draft', max_length=20)),
-                ('pdf_url', models.URLField(blank=True)),
-                ('notes', models.TextField(blank=True)),
-                ('lease', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='bills', to='properties.lease')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_set', to='accounts.organization')),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("organization", models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="bill_set",
+                    to="accounts.organization",
+                )),
+                ("lease", models.ForeignKey(
+                    on_delete=django.db.models.deletion.PROTECT,
+                    related_name="bills",
+                    to="properties.lease",
+                )),
+                ("bill_number", models.CharField(max_length=50, unique=True)),
+                ("bill_type", models.CharField(
+                    choices=[
+                        ("rent", "Rent"), ("electricity", "Electricity"), ("water", "Water"),
+                        ("maintenance", "Maintenance"), ("combined", "Combined"),
+                    ],
+                    max_length=20,
+                )),
+                ("period_start", models.DateField()),
+                ("period_end", models.DateField()),
+                ("issue_date", models.DateField()),
+                ("due_date", models.DateField(db_index=True)),
+                ("subtotal", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("tax_amount", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("total_amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("amount_paid", models.DecimalField(decimal_places=2, default=0, max_digits=12)),
+                ("status", models.CharField(
+                    choices=[
+                        ("draft", "Draft"), ("issued", "Issued"), ("paid", "Paid"),
+                        ("partially_paid", "Partially Paid"), ("overdue", "Overdue"),
+                        ("cancelled", "Cancelled"),
+                    ],
+                    db_index=True,
+                    default="draft",
+                    max_length=20,
+                )),
+                ("pdf_url", models.URLField(blank=True)),
+                ("notes", models.TextField(blank=True)),
             ],
-            options={
-                'db_table': 'bills',
-            },
+            options={"db_table": "bills"},
+        ),
+        migrations.AddIndex(
+            model_name="bill",
+            index=models.Index(fields=["organization", "status", "due_date"], name="bills_org_status_due_idx"),
+        ),
+        migrations.AddIndex(
+            model_name="bill",
+            index=models.Index(fields=["lease", "status"], name="bills_lease_status_idx"),
         ),
         migrations.CreateModel(
-            name='BillLineItem',
+            name="BillLineItem",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('description', models.CharField(max_length=255)),
-                ('quantity', models.DecimalField(decimal_places=2, default=1, max_digits=10)),
-                ('unit_price', models.DecimalField(decimal_places=4, max_digits=12)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('tax_rate', models.DecimalField(decimal_places=2, default=0, max_digits=5)),
-                ('metadata', models.JSONField(blank=True, default=dict)),
-                ('bill', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='line_items', to='billing.bill')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_set', to='accounts.organization')),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ("organization", models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="billlineitem_set",
+                    to="accounts.organization",
+                )),
+                ("bill", models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name="line_items",
+                    to="billing.bill",
+                )),
+                ("description", models.CharField(max_length=255)),
+                ("quantity", models.DecimalField(decimal_places=2, default=1, max_digits=10)),
+                ("unit_price", models.DecimalField(decimal_places=4, max_digits=12)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("tax_rate", models.DecimalField(decimal_places=2, default=0, max_digits=5)),
+                ("metadata", models.JSONField(blank=True, default=dict)),
             ],
-            options={
-                'db_table': 'bill_line_items',
-            },
-        ),
-        migrations.AddIndex(
-            model_name='bill',
-            index=models.Index(fields=['organization', 'status', 'due_date'], name='bills_organiz_71e2e1_idx'),
-        ),
-        migrations.AddIndex(
-            model_name='bill',
-            index=models.Index(fields=['lease', 'status'], name='bills_lease_i_3b0f3e_idx'),
+            options={"db_table": "bill_line_items"},
         ),
     ]

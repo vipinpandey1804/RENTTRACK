@@ -27,6 +27,7 @@ class Property(TenantAwareModel, SoftDeleteModel):
     state = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
     country = models.CharField(max_length=2, default="IN")
+    cover_image = models.ImageField(upload_to="property_covers/", null=True, blank=True)
 
     # Tariff defaults (can be overridden per unit)
     electricity_rate_per_unit = models.DecimalField(
