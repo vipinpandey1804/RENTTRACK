@@ -97,3 +97,17 @@ export interface ApiError {
   detail?: string;
   [key: string]: string | string[] | undefined;
 }
+
+export type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'read';
+
+export interface Notification {
+  id: string;
+  channel: 'email' | 'sms' | 'whatsapp' | 'in_app' | 'push';
+  event_type: string;
+  subject: string;
+  body: string;
+  status: NotificationStatus;
+  sent_at: string | null;
+  read_at: string | null;
+  created_at: string;
+}

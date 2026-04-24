@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
+import { useNotifications, useMarkRead, useMarkAllRead, useUnreadCount } from '@/hooks/useNotifications';
 
 const nav = [
   {
@@ -34,6 +35,115 @@ const nav = [
     ),
   },
 ];
+
+function timeAgo(iso: string) {
+  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (secs < 60) return 'just now';
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+  return `${Math.floor(secs / 86400)}d ago`;
+}
+
+function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const { data } = useNotifications();
+  const unread = useUnreadCount();
+  const markRead = useMarkRead();
+  const markAllRead = useMarkAllRead();
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const notifications = data?.results ?? [];
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative flex items-center justify-center h-8 w-8 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        aria-label="Notifications"
+      >
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        {unread > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-10 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+            {unread > 0 && (
+              <button
+                onClick={() => markAllRead.mutate()}
+                disabled={markAllRead.isPending}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50"
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
+
+          <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+            {notifications.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-gray-400">
+                No notifications yet
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className={`px-4 py-3 flex gap-3 items-start hover:bg-gray-50 transition-colors ${
+                    n.read_at === null ? 'bg-blue-50/40' : ''
+                  }`}
+                >
+                  <div className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${
+                    n.read_at === null ? 'bg-blue-500' : 'bg-transparent'
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm leading-snug ${n.read_at === null ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
+                      {n.subject}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.created_at)}</p>
+                  </div>
+                  {n.read_at === null && (
+                    <button
+                      onClick={() => markRead.mutate(n.id)}
+                      disabled={markRead.isPending}
+                      className="flex-shrink-0 text-xs text-gray-400 hover:text-blue-600 transition-colors mt-0.5 disabled:opacity-50"
+                      title="Mark as read"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          {(data?.count ?? 0) > 20 && (
+            <div className="px-4 py-2.5 border-t border-gray-100 text-center">
+              <span className="text-xs text-gray-400">Showing 20 of {data!.count}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -103,6 +213,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {user.active_organization.name}
             </span>
           )}
+
+          <NotificationBell />
+
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen((o) => !o)}
