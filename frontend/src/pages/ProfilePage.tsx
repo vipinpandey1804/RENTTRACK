@@ -5,6 +5,13 @@ import Input from "@/components/ui/Input";
 import { toast } from "@/components/ui/Toast";
 import { useAuthStore } from "@/store/auth";
 import { api } from "@/lib/api";
+import {
+  PREFERENCE_CHANNELS,
+  PREFERENCE_EVENTS,
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+  type NotificationPreferenceItem,
+} from "@/hooks/useNotifications";
 
 function ProfileForm() {
   const { user, setUser } = useAuthStore();
@@ -145,6 +152,96 @@ function ChangePasswordForm() {
   );
 }
 
+function NotificationPreferencesSection() {
+  const { data: prefs, isLoading } = useNotificationPreferences();
+  const update = useUpdateNotificationPreferences();
+
+  const isEnabled = (eventKey: string, channelKey: string) => {
+    if (!prefs) return true;
+    return (
+      prefs.find((p) => p.event_type === eventKey && p.channel === channelKey)
+        ?.enabled ?? true
+    );
+  };
+
+  const toggle = (eventKey: string, channelKey: string) => {
+    if (!prefs) return;
+    const current = isEnabled(eventKey, channelKey);
+    const updated: NotificationPreferenceItem[] = PREFERENCE_EVENTS.flatMap(
+      (evt) =>
+        PREFERENCE_CHANNELS.map((ch) => ({
+          event_type: evt.key,
+          channel: ch.key,
+          enabled:
+            evt.key === eventKey && ch.key === channelKey
+              ? !current
+              : isEnabled(evt.key, ch.key),
+        })),
+    );
+    update.mutate(updated, {
+      onError: () => toast.error("Failed to update preferences"),
+    });
+  };
+
+  if (isLoading) {
+    return <p className="text-sm text-gray-400">Loading preferences…</p>;
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr>
+            <th className="text-left font-medium text-gray-500 pb-3 pr-6">
+              Event
+            </th>
+            {PREFERENCE_CHANNELS.map((ch) => (
+              <th
+                key={ch.key}
+                className="text-center font-medium text-gray-500 pb-3 px-4 w-24"
+              >
+                {ch.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {PREFERENCE_EVENTS.map((evt) => (
+            <tr key={evt.key}>
+              <td className="py-3 pr-6 text-gray-700 font-medium">
+                {evt.label}
+              </td>
+              {PREFERENCE_CHANNELS.map((ch) => {
+                const on = isEnabled(evt.key, ch.key);
+                return (
+                  <td key={ch.key} className="py-3 px-4 text-center">
+                    <button
+                      onClick={() => toggle(evt.key, ch.key)}
+                      disabled={update.isPending}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 ${
+                        on ? "bg-blue-600" : "bg-gray-200"
+                      }`}
+                      role="switch"
+                      aria-checked={on}
+                      aria-label={`${evt.label} via ${ch.label}`}
+                    >
+                      <span
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                          on ? "translate-x-4" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { user } = useAuthStore();
   const initials =
@@ -207,6 +304,17 @@ export default function ProfilePage() {
             </ul>
           </div>
         )}
+
+        {/* Notification preferences */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-700 mb-1">
+            Notification preferences
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Choose which notifications you receive and how.
+          </p>
+          <NotificationPreferencesSection />
+        </div>
 
         {/* Change password */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
