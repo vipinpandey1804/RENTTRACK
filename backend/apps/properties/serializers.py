@@ -1,4 +1,5 @@
 """Serializers for properties, units, and leases."""
+
 from rest_framework import serializers
 
 from apps.properties.models import Lease, Property, Unit

@@ -77,6 +77,7 @@ make logs
 ```
 
 Visit:
+
 - http://localhost:5173 — frontend
 - http://localhost:8000/api/docs/ — Swagger UI
 - http://localhost:8000/admin/ — Django admin

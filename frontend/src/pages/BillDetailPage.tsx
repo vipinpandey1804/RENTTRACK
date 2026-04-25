@@ -1,35 +1,43 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import AppShell from '@/components/layout/AppShell';
-import StatusBadge from '@/components/ui/StatusBadge';
-import Button from '@/components/ui/Button';
-import Modal from '@/components/ui/Modal';
-import Input from '@/components/ui/Input';
-import { toast } from '@/components/ui/Toast';
-import { useBill, useRecordPayment, useCancelBill } from '@/hooks/useBilling';
-import type { PaymentRecord } from '@/types/billing';
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { format } from "date-fns";
+import AppShell from "@/components/layout/AppShell";
+import StatusBadge from "@/components/ui/StatusBadge";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import { toast } from "@/components/ui/Toast";
+import { useBill, useRecordPayment, useCancelBill } from "@/hooks/useBilling";
+import type { PaymentRecord } from "@/types/billing";
 
 const PAYMENT_METHODS = [
-  { value: 'upi', label: 'UPI' },
-  { value: 'bank_transfer', label: 'Bank Transfer' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'cheque', label: 'Cheque' },
-  { value: 'card', label: 'Card' },
+  { value: "upi", label: "UPI" },
+  { value: "bank_transfer", label: "Bank Transfer" },
+  { value: "cash", label: "Cash" },
+  { value: "cheque", label: "Cheque" },
+  { value: "card", label: "Card" },
 ];
 
 function PaymentRow({ payment }: { payment: PaymentRecord }) {
   return (
     <tr className="border-b border-gray-100">
       <td className="py-2 px-4 text-sm text-gray-600">
-        {payment.paid_at ? format(new Date(payment.paid_at), 'dd MMM yyyy, HH:mm') : '—'}
+        {payment.paid_at
+          ? format(new Date(payment.paid_at), "dd MMM yyyy, HH:mm")
+          : "—"}
       </td>
       <td className="py-2 px-4 text-sm font-medium text-gray-900">
-        ₹{Number(payment.amount).toLocaleString('en-IN')}
+        ₹{Number(payment.amount).toLocaleString("en-IN")}
       </td>
-      <td className="py-2 px-4 text-sm text-gray-600 capitalize">{payment.method}</td>
-      <td className="py-2 px-4 text-sm text-gray-500">{payment.reference_number || '—'}</td>
-      <td className="py-2 px-4 text-sm text-gray-500">{payment.recorded_by_email || '—'}</td>
+      <td className="py-2 px-4 text-sm text-gray-600 capitalize">
+        {payment.method}
+      </td>
+      <td className="py-2 px-4 text-sm text-gray-500">
+        {payment.reference_number || "—"}
+      </td>
+      <td className="py-2 px-4 text-sm text-gray-500">
+        {payment.recorded_by_email || "—"}
+      </td>
     </tr>
   );
 }
@@ -47,9 +55,9 @@ function RecordPaymentModal({
 }) {
   const recordPayment = useRecordPayment(billId);
   const [amount, setAmount] = useState(String(balanceDue));
-  const [method, setMethod] = useState('upi');
-  const [reference, setReference] = useState('');
-  const [notes, setNotes] = useState('');
+  const [method, setMethod] = useState("upi");
+  const [reference, setReference] = useState("");
+  const [notes, setNotes] = useState("");
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,10 +68,10 @@ function RecordPaymentModal({
         reference_number: reference,
         notes,
       });
-      toast.success('Payment recorded');
+      toast.success("Payment recorded");
       onClose();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail ?? 'Failed to record payment');
+      toast.error(err?.response?.data?.detail ?? "Failed to record payment");
     }
   };
 
@@ -79,7 +87,7 @@ function RecordPaymentModal({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           required
-          hint={`Balance due: ₹${balanceDue.toLocaleString('en-IN')}`}
+          hint={`Balance due: ₹${balanceDue.toLocaleString("en-IN")}`}
         />
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -91,7 +99,9 @@ function RecordPaymentModal({
             className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {PAYMENT_METHODS.map((m) => (
-              <option key={m.value} value={m.value}>{m.label}</option>
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
             ))}
           </select>
         </div>
@@ -107,8 +117,12 @@ function RecordPaymentModal({
           onChange={(e) => setNotes(e.target.value)}
         />
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button type="submit" loading={recordPayment.isPending}>Record payment</Button>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={recordPayment.isPending}>
+            Record payment
+          </Button>
         </div>
       </form>
     </Modal>
@@ -122,12 +136,12 @@ export default function BillDetailPage() {
   const cancelBill = useCancelBill(id!);
 
   const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this bill?')) return;
+    if (!confirm("Are you sure you want to cancel this bill?")) return;
     try {
       await cancelBill.mutateAsync();
-      toast.success('Bill cancelled');
+      toast.success("Bill cancelled");
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail ?? 'Failed to cancel bill');
+      toast.error(err?.response?.data?.detail ?? "Failed to cancel bill");
     }
   };
 
@@ -151,13 +165,16 @@ export default function BillDetailPage() {
   }
 
   const balanceDue = Number(bill.balance_due);
-  const canPay = ['issued', 'partially_paid', 'overdue'].includes(bill.status);
-  const canCancel = ['draft', 'issued'].includes(bill.status);
+  const canPay = ["issued", "partially_paid", "overdue"].includes(bill.status);
+  const canCancel = ["draft", "issued"].includes(bill.status);
 
   return (
     <AppShell>
       <div className="mb-1">
-        <Link to="/billing" className="text-sm text-gray-500 hover:text-gray-700">
+        <Link
+          to="/billing"
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
           ← Billing
         </Link>
       </div>
@@ -165,11 +182,13 @@ export default function BillDetailPage() {
       <div className="flex items-start justify-between mt-2 mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{bill.bill_number}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {bill.bill_number}
+            </h1>
             <StatusBadge status={bill.status} />
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            {bill.lease_info.tenant_name || bill.lease_info.tenant_email} ·{' '}
+            {bill.lease_info.tenant_name || bill.lease_info.tenant_email} ·{" "}
             {bill.lease_info.unit_name}, {bill.lease_info.property_name}
           </p>
         </div>
@@ -178,7 +197,11 @@ export default function BillDetailPage() {
             <Button onClick={() => setShowRecord(true)}>Record payment</Button>
           )}
           {canCancel && (
-            <Button variant="danger" loading={cancelBill.isPending} onClick={handleCancel}>
+            <Button
+              variant="danger"
+              loading={cancelBill.isPending}
+              onClick={handleCancel}
+            >
               Cancel bill
             </Button>
           )}
@@ -188,14 +211,36 @@ export default function BillDetailPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total amount', value: `₹${Number(bill.total_amount).toLocaleString('en-IN')}` },
-          { label: 'Amount paid', value: `₹${Number(bill.amount_paid).toLocaleString('en-IN')}` },
-          { label: 'Balance due', value: `₹${balanceDue.toLocaleString('en-IN')}`, highlight: balanceDue > 0 },
-          { label: 'Due date', value: format(new Date(bill.due_date), 'dd MMM yyyy') },
+          {
+            label: "Total amount",
+            value: `₹${Number(bill.total_amount).toLocaleString("en-IN")}`,
+          },
+          {
+            label: "Amount paid",
+            value: `₹${Number(bill.amount_paid).toLocaleString("en-IN")}`,
+          },
+          {
+            label: "Balance due",
+            value: `₹${balanceDue.toLocaleString("en-IN")}`,
+            highlight: balanceDue > 0,
+          },
+          {
+            label: "Due date",
+            value: format(new Date(bill.due_date), "dd MMM yyyy"),
+          },
         ].map(({ label, value, highlight }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">{label}</p>
-            <p className={`text-xl font-bold mt-1 ${highlight ? 'text-red-700' : 'text-gray-900'}`}>
+          <div
+            key={label}
+            className="bg-white rounded-xl border border-gray-200 p-4"
+          >
+            <p className="text-xs text-gray-500 uppercase tracking-wide">
+              {label}
+            </p>
+            <p
+              className={`text-xl font-bold mt-1 ${
+                highlight ? "text-red-700" : "text-gray-900"
+              }`}
+            >
               {value}
             </p>
           </div>
@@ -219,22 +264,32 @@ export default function BillDetailPage() {
             </thead>
             <tbody>
               {bill.line_items.map((item) => (
-                <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                  <td className="py-2 px-4 text-sm text-gray-700">{item.description}</td>
-                  <td className="py-2 px-4 text-sm text-gray-500 text-right">{item.quantity}</td>
+                <tr
+                  key={item.id}
+                  className="border-b border-gray-100 last:border-0"
+                >
+                  <td className="py-2 px-4 text-sm text-gray-700">
+                    {item.description}
+                  </td>
+                  <td className="py-2 px-4 text-sm text-gray-500 text-right">
+                    {item.quantity}
+                  </td>
                   <td className="py-2 px-4 text-sm font-medium text-gray-900 text-right">
-                    ₹{Number(item.amount).toLocaleString('en-IN')}
+                    ₹{Number(item.amount).toLocaleString("en-IN")}
                   </td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="border-t border-gray-200 bg-gray-50">
               <tr>
-                <td colSpan={2} className="py-2 px-4 text-sm font-semibold text-gray-700 text-right">
+                <td
+                  colSpan={2}
+                  className="py-2 px-4 text-sm font-semibold text-gray-700 text-right"
+                >
                   Total
                 </td>
                 <td className="py-2 px-4 text-sm font-bold text-gray-900 text-right">
-                  ₹{Number(bill.total_amount).toLocaleString('en-IN')}
+                  ₹{Number(bill.total_amount).toLocaleString("en-IN")}
                 </td>
               </tr>
             </tfoot>
@@ -255,7 +310,9 @@ export default function BillDetailPage() {
             )}
           </div>
           {bill.payments.length === 0 ? (
-            <p className="p-6 text-sm text-gray-400 text-center">No payments recorded</p>
+            <p className="p-6 text-sm text-gray-400 text-center">
+              No payments recorded
+            </p>
           ) : (
             <table className="w-full">
               <thead className="bg-gray-50 text-xs text-gray-500 uppercase">

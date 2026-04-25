@@ -1,4 +1,5 @@
 """Serializers for accounts: signup, user profile, org, invite."""
+
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.utils.text import slugify

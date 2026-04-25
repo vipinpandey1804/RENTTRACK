@@ -1,4 +1,5 @@
 """Tests for tenant invite flow (Issue #7)."""
+
 import pytest
 from django.utils import timezone
 
@@ -54,6 +55,7 @@ class TestInviteCreation:
         tenant.active_organization = org
         tenant.save(update_fields=["active_organization"])
         from rest_framework_simplejwt.tokens import RefreshToken
+
         token = RefreshToken.for_user(tenant)
         client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.access_token}"
         resp = client.post(
@@ -82,8 +84,12 @@ class TestValidateInvite:
 
     def test_expired_invite_returns_404(self, client, org, owner):
         from datetime import timedelta
+
         invite = Invite(
-            organization=org, invited_by=owner, email="e@test.com", role="tenant",
+            organization=org,
+            invited_by=owner,
+            email="e@test.com",
+            role="tenant",
             expires_at=timezone.now() - timedelta(hours=1),
         )
         invite.save()

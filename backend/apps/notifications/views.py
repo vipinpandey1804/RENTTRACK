@@ -1,4 +1,5 @@
 """Notifications views — tenant can list their own notifications."""
+
 from rest_framework import filters, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -11,8 +12,15 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = [
-            "id", "channel", "event_type", "subject", "body",
-            "status", "sent_at", "read_at", "created_at",
+            "id",
+            "channel",
+            "event_type",
+            "subject",
+            "body",
+            "status",
+            "sent_at",
+            "read_at",
+            "created_at",
         ]
         read_only_fields = ["id", "sent_at", "read_at", "created_at"]
 
@@ -31,6 +39,7 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["post"])
     def mark_read(self, request, pk=None):
         from django.utils import timezone
+
         notification = self.get_object()
         if notification.read_at is None:
             notification.read_at = timezone.now()
@@ -41,8 +50,9 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=["post"])
     def mark_all_read(self, request):
         from django.utils import timezone
+
         now = timezone.now()
-        Notification.objects.filter(
-            recipient=request.user, read_at__isnull=True
-        ).update(read_at=now, status=Notification.Status.READ)
+        Notification.objects.filter(recipient=request.user, read_at__isnull=True).update(
+            read_at=now, status=Notification.Status.READ
+        )
         return Response({"status": "ok"})

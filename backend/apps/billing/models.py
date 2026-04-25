@@ -4,6 +4,7 @@ Billing: invoices, line items, and payment tracking.
 Bills are immutable once issued. Corrections happen via credit notes.
 Payments are recorded against bills with full audit trail.
 """
+
 from django.db import models
 
 from apps.core.models import TenantAwareModel
@@ -27,9 +28,7 @@ class Bill(TenantAwareModel):
         MAINTENANCE = "maintenance", "Maintenance"
         COMBINED = "combined", "Combined"
 
-    lease = models.ForeignKey(
-        "properties.Lease", on_delete=models.PROTECT, related_name="bills"
-    )
+    lease = models.ForeignKey("properties.Lease", on_delete=models.PROTECT, related_name="bills")
     bill_number = models.CharField(max_length=50, unique=True)
     bill_type = models.CharField(max_length=20, choices=BillType.choices)
     period_start = models.DateField()

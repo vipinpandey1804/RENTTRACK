@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import type { Bill, RecordPaymentPayload } from '@/types/billing';
-import type { PaginatedResponse } from '@/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import type { Bill, RecordPaymentPayload } from "@/types/billing";
+import type { PaginatedResponse } from "@/types";
 
 export interface BillFilters {
   status?: string;
@@ -17,17 +17,17 @@ export interface BillFilters {
 
 export function useBills(filters: BillFilters = {}) {
   return useQuery({
-    queryKey: ['bills', filters],
+    queryKey: ["bills", filters],
     queryFn: async () => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== '') {
+        if (v !== undefined && v !== null && v !== "") {
           params.set(k, String(v));
         }
       });
       const qs = params.toString();
       const { data } = await api.get<PaginatedResponse<Bill>>(
-        `/billing/bills/${qs ? `?${qs}` : ''}`,
+        `/billing/bills/${qs ? `?${qs}` : ""}`,
       );
       return data;
     },
@@ -36,7 +36,7 @@ export function useBills(filters: BillFilters = {}) {
 
 export function useBill(id: string) {
   return useQuery({
-    queryKey: ['bills', id],
+    queryKey: ["bills", id],
     queryFn: async () => {
       const { data } = await api.get<Bill>(`/billing/bills/${id}/`);
       return data;
@@ -49,8 +49,8 @@ export function useGenerateBill() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: { lease_id: string; period_date: string }) =>
-      api.post<Bill>('/billing/bills/generate/', payload).then((r) => r.data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['bills'] }),
+      api.post<Bill>("/billing/bills/generate/", payload).then((r) => r.data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["bills"] }),
   });
 }
 
@@ -58,10 +58,12 @@ export function useRecordPayment(billId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: RecordPaymentPayload) =>
-      api.post<Bill>(`/billing/bills/${billId}/record_payment/`, payload).then((r) => r.data),
+      api
+        .post<Bill>(`/billing/bills/${billId}/record_payment/`, payload)
+        .then((r) => r.data),
     onSuccess: (updatedBill) => {
-      qc.setQueryData(['bills', billId], updatedBill);
-      qc.invalidateQueries({ queryKey: ['bills'] });
+      qc.setQueryData(["bills", billId], updatedBill);
+      qc.invalidateQueries({ queryKey: ["bills"] });
     },
   });
 }
@@ -72,8 +74,8 @@ export function useCancelBill(billId: string) {
     mutationFn: () =>
       api.post<Bill>(`/billing/bills/${billId}/cancel/`).then((r) => r.data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['bills', billId] });
-      qc.invalidateQueries({ queryKey: ['bills'] });
+      qc.invalidateQueries({ queryKey: ["bills", billId] });
+      qc.invalidateQueries({ queryKey: ["bills"] });
     },
   });
 }

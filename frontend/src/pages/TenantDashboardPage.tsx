@@ -1,19 +1,21 @@
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import AppShell from '@/components/layout/AppShell';
-import StatusBadge from '@/components/ui/StatusBadge';
-import { useAuthStore } from '@/store/auth';
-import { useLeases } from '@/hooks/useProperties';
-import { useBills } from '@/hooks/useBilling';
-import type { Lease } from '@/types';
-import type { Bill } from '@/types/billing';
+import { Link } from "react-router-dom";
+import { format } from "date-fns";
+import AppShell from "@/components/layout/AppShell";
+import StatusBadge from "@/components/ui/StatusBadge";
+import { useAuthStore } from "@/store/auth";
+import { useLeases } from "@/hooks/useProperties";
+import { useBills } from "@/hooks/useBilling";
+import type { Lease } from "@/types";
+import type { Bill } from "@/types/billing";
 
 function LeaseCard({ lease }: { lease: Lease }) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">{lease.unit_name}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {lease.unit_name}
+          </h2>
           <p className="text-sm text-gray-500">{lease.property_name}</p>
         </div>
         <StatusBadge status={lease.status} />
@@ -21,29 +23,41 @@ function LeaseCard({ lease }: { lease: Lease }) {
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
         <div>
           <dt className="text-gray-500">Monthly Rent</dt>
-          <dd className="font-medium text-gray-900">₹{Number(lease.monthly_rent).toLocaleString('en-IN')}</dd>
+          <dd className="font-medium text-gray-900">
+            ₹{Number(lease.monthly_rent).toLocaleString("en-IN")}
+          </dd>
         </div>
         <div>
           <dt className="text-gray-500">Security Deposit</dt>
-          <dd className="font-medium text-gray-900">₹{Number(lease.security_deposit_held).toLocaleString('en-IN')}</dd>
+          <dd className="font-medium text-gray-900">
+            ₹{Number(lease.security_deposit_held).toLocaleString("en-IN")}
+          </dd>
         </div>
         <div>
           <dt className="text-gray-500">Start Date</dt>
-          <dd className="font-medium text-gray-900">{format(new Date(lease.start_date), 'dd MMM yyyy')}</dd>
+          <dd className="font-medium text-gray-900">
+            {format(new Date(lease.start_date), "dd MMM yyyy")}
+          </dd>
         </div>
         {lease.end_date && (
           <div>
             <dt className="text-gray-500">End Date</dt>
-            <dd className="font-medium text-gray-900">{format(new Date(lease.end_date), 'dd MMM yyyy')}</dd>
+            <dd className="font-medium text-gray-900">
+              {format(new Date(lease.end_date), "dd MMM yyyy")}
+            </dd>
           </div>
         )}
         <div>
           <dt className="text-gray-500">Billing Cycle</dt>
-          <dd className="font-medium text-gray-900 capitalize">{lease.billing_cycle}</dd>
+          <dd className="font-medium text-gray-900 capitalize">
+            {lease.billing_cycle}
+          </dd>
         </div>
         <div>
           <dt className="text-gray-500">Bill Generated On</dt>
-          <dd className="font-medium text-gray-900">Day {lease.billing_day_of_month}</dd>
+          <dd className="font-medium text-gray-900">
+            Day {lease.billing_day_of_month}
+          </dd>
         </div>
       </dl>
     </div>
@@ -51,22 +65,29 @@ function LeaseCard({ lease }: { lease: Lease }) {
 }
 
 function OutstandingBillRow({ bill }: { bill: Bill }) {
-  const isOverdue = bill.status === 'overdue';
+  const isOverdue = bill.status === "overdue";
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
       <td className="py-3 px-4">
-        <Link to={`/billing/${bill.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+        <Link
+          to={`/billing/${bill.id}`}
+          className="text-sm font-medium text-blue-700 hover:underline"
+        >
           {bill.bill_number}
         </Link>
       </td>
       <td className="py-3 px-4 text-sm text-gray-600">
-        {format(new Date(bill.period_start), 'MMM yyyy')}
+        {format(new Date(bill.period_start), "MMM yyyy")}
       </td>
-      <td className={`py-3 px-4 text-sm font-medium ${isOverdue ? 'text-red-700' : 'text-gray-700'}`}>
-        {format(new Date(bill.due_date), 'dd MMM yyyy')}
+      <td
+        className={`py-3 px-4 text-sm font-medium ${
+          isOverdue ? "text-red-700" : "text-gray-700"
+        }`}
+      >
+        {format(new Date(bill.due_date), "dd MMM yyyy")}
       </td>
       <td className="py-3 px-4 text-sm font-semibold text-gray-900">
-        ₹{Number(bill.balance_due).toLocaleString('en-IN')}
+        ₹{Number(bill.balance_due).toLocaleString("en-IN")}
       </td>
       <td className="py-3 px-4">
         <StatusBadge status={bill.status} />
@@ -89,12 +110,12 @@ export default function TenantDashboardPage() {
   // Fetch leases for the current tenant
   const { data: leasesData, isLoading: leasesLoading } = useLeases({
     tenant: user?.id,
-    status: 'active',
+    status: "active",
   });
 
   // Fetch outstanding bills (issued + overdue)
-  const { data: issuedBills } = useBills({ status: 'issued', page_size: 10 });
-  const { data: overdueBills } = useBills({ status: 'overdue', page_size: 10 });
+  const { data: issuedBills } = useBills({ status: "issued", page_size: 10 });
+  const { data: overdueBills } = useBills({ status: "overdue", page_size: 10 });
 
   const outstandingBills: Bill[] = [
     ...(overdueBills?.results ?? []),
@@ -118,9 +139,12 @@ export default function TenantDashboardPage() {
         <div className="mb-6 rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
           <span className="text-amber-500 mt-0.5">⚠</span>
           <div>
-            <p className="text-sm font-medium text-amber-800">Email not verified</p>
+            <p className="text-sm font-medium text-amber-800">
+              Email not verified
+            </p>
             <p className="text-sm text-amber-700 mt-0.5">
-              Please check your inbox and verify your email address to receive bill notifications.
+              Please check your inbox and verify your email address to receive
+              bill notifications.
             </p>
           </div>
         </div>
@@ -129,7 +153,9 @@ export default function TenantDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: lease info */}
         <div className="lg:col-span-1 space-y-4">
-          <h2 className="text-base font-semibold text-gray-700">Your Tenancy</h2>
+          <h2 className="text-base font-semibold text-gray-700">
+            Your Tenancy
+          </h2>
           {leasesLoading ? (
             <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse space-y-3">
               {[...Array(4)].map((_, i) => (
@@ -156,12 +182,16 @@ export default function TenantDashboardPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Phone</dt>
-                <dd className="text-gray-900">{user?.phone || '—'}</dd>
+                <dd className="text-gray-900">{user?.phone || "—"}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Email verified</dt>
-                <dd className={user?.email_verified ? 'text-green-600' : 'text-amber-600'}>
-                  {user?.email_verified ? 'Yes' : 'No'}
+                <dd
+                  className={
+                    user?.email_verified ? "text-green-600" : "text-amber-600"
+                  }
+                >
+                  {user?.email_verified ? "Yes" : "No"}
                 </dd>
               </div>
             </dl>
@@ -179,7 +209,10 @@ export default function TenantDashboardPage() {
                 </span>
               )}
             </h2>
-            <Link to="/billing" className="text-sm text-blue-600 hover:underline">
+            <Link
+              to="/billing"
+              className="text-sm text-blue-600 hover:underline"
+            >
               View all bills →
             </Link>
           </div>
@@ -188,7 +221,9 @@ export default function TenantDashboardPage() {
             <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
               <p className="text-3xl mb-3">✓</p>
               <p className="text-gray-500 font-medium">All caught up!</p>
-              <p className="text-sm text-gray-400 mt-1">No outstanding bills at the moment.</p>
+              <p className="text-sm text-gray-400 mt-1">
+                No outstanding bills at the moment.
+              </p>
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -214,7 +249,9 @@ export default function TenantDashboardPage() {
 
           {/* Meter reading placeholder */}
           <div className="mt-4 bg-white rounded-xl border border-dashed border-gray-200 p-5 text-center">
-            <p className="text-sm font-medium text-gray-600">Meter Reading Submission</p>
+            <p className="text-sm font-medium text-gray-600">
+              Meter Reading Submission
+            </p>
             <p className="text-xs text-gray-400 mt-1">
               Electricity meter reading submission coming in Phase 2.
             </p>

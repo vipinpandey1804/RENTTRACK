@@ -63,6 +63,7 @@ docker-compose up --build
 ```
 
 Services that come up:
+
 - **Backend API** → http://localhost:8000
 - **Frontend** → http://localhost:5173
 - **PostgreSQL** → localhost:5432
@@ -72,6 +73,7 @@ Services that come up:
 ### Local Development (without Docker)
 
 **Backend:**
+
 ```bash
 cd backend
 python -m venv venv
@@ -83,6 +85,7 @@ python manage.py runserver
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm install
@@ -90,6 +93,7 @@ npm run dev
 ```
 
 **Background worker (Celery):**
+
 ```bash
 cd backend
 celery -A config worker -l info
@@ -113,25 +117,25 @@ npm run test:e2e
 
 See `.env.example` for all available configuration. Critical ones:
 
-| Variable | Purpose | Required |
-|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | ✅ |
-| `REDIS_URL` | Redis connection string | ✅ |
-| `SECRET_KEY` | Django secret key | ✅ |
-| `JWT_SECRET` | JWT signing key | ✅ |
-| `SENDGRID_API_KEY` | Email provider | Prod only |
-| `MSG91_AUTH_KEY` | SMS provider (India) | Prod only |
-| `RAZORPAY_KEY_ID` | Payment gateway | Prod only |
+| Variable           | Purpose                      | Required  |
+| ------------------ | ---------------------------- | --------- |
+| `DATABASE_URL`     | PostgreSQL connection string | ✅        |
+| `REDIS_URL`        | Redis connection string      | ✅        |
+| `SECRET_KEY`       | Django secret key            | ✅        |
+| `JWT_SECRET`       | JWT signing key              | ✅        |
+| `SENDGRID_API_KEY` | Email provider               | Prod only |
+| `MSG91_AUTH_KEY`   | SMS provider (India)         | Prod only |
+| `RAZORPAY_KEY_ID`  | Payment gateway              | Prod only |
 
 ## 📊 Project Status
 
-| Phase | Status | Target |
-|---|---|---|
-| Phase 0: Foundation | 🟡 In Progress | Week 1–2 |
-| Phase 1: MVP | ⚪ Planned | Week 3–4 |
-| Phase 2: Metering + SMS | ⚪ Planned | Week 5–6 |
-| Phase 3: Payments | ⚪ Planned | Week 7–8 |
-| Phase 4: Scale Hardening | ⚪ Planned | Week 9–12 |
+| Phase                    | Status         | Target    |
+| ------------------------ | -------------- | --------- |
+| Phase 0: Foundation      | 🟡 In Progress | Week 1–2  |
+| Phase 1: MVP             | ⚪ Planned     | Week 3–4  |
+| Phase 2: Metering + SMS  | ⚪ Planned     | Week 5–6  |
+| Phase 3: Payments        | ⚪ Planned     | Week 7–8  |
+| Phase 4: Scale Hardening | ⚪ Planned     | Week 9–12 |
 
 See [PRD](./docs/PRD.md) for the full rollout plan.
 

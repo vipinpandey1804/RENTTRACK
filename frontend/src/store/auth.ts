@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import axios from 'axios';
-import type { User } from '@/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import axios from "axios";
+import type { User } from "@/types";
 
 interface AuthState {
   accessToken: string | null;
@@ -23,7 +23,7 @@ interface SignupData {
   org_name: string;
 }
 
-const API = import.meta.env.VITE_API_URL || '/api/v1';
+const API = import.meta.env.VITE_API_URL || "/api/v1";
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -33,7 +33,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
 
       login: async (email, password) => {
-        const { data } = await axios.post(`${API}/auth/login/`, { email, password });
+        const { data } = await axios.post(`${API}/auth/login/`, {
+          email,
+          password,
+        });
         set({ accessToken: data.access, refreshToken: data.refresh });
         // Fetch user profile after login
         try {
@@ -48,7 +51,11 @@ export const useAuthStore = create<AuthState>()(
 
       signup: async (signupData) => {
         const { data } = await axios.post(`${API}/auth/signup/`, signupData);
-        set({ accessToken: data.access, refreshToken: data.refresh, user: data.user });
+        set({
+          accessToken: data.access,
+          refreshToken: data.refresh,
+          user: data.user,
+        });
       },
 
       logout: async () => {
@@ -72,7 +79,9 @@ export const useAuthStore = create<AuthState>()(
         const refreshToken = get().refreshToken;
         if (!refreshToken) return null;
         try {
-          const { data } = await axios.post(`${API}/auth/refresh/`, { refresh: refreshToken });
+          const { data } = await axios.post(`${API}/auth/refresh/`, {
+            refresh: refreshToken,
+          });
           set({ accessToken: data.access });
           return data.access;
         } catch {
@@ -96,6 +105,6 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) => set({ user }),
     }),
-    { name: 'renttrack-auth' },
+    { name: "renttrack-auth" },
   ),
 );

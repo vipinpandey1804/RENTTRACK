@@ -3,6 +3,7 @@ Billing service layer.
 
 All bill generation logic lives here so views and tasks stay thin.
 """
+
 import uuid
 from datetime import date, timedelta
 from decimal import Decimal
@@ -11,7 +12,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.billing.models import Bill, BillLineItem
-from apps.properties.models import Lease, Unit
+from apps.properties.models import Lease
 
 
 def _month_range(period_date: date) -> tuple[date, date]:
@@ -63,7 +64,6 @@ def generate_rent_bill(lease: Lease, period_date: date) -> Bill:
     due_date = _due_date(issue_date, lease.billing_day_of_month)
 
     rent = lease.monthly_rent
-    late_fee = Decimal("0")
 
     bill = Bill.objects.create(
         organization=lease.organization,
@@ -93,7 +93,9 @@ def generate_rent_bill(lease: Lease, period_date: date) -> Bill:
 
 
 @transaction.atomic
-def apply_payment(bill: Bill, amount: Decimal, method: str, recorded_by, reference: str = "", notes: str = "") -> "Payment":  # noqa: F821
+def apply_payment(
+    bill: Bill, amount: Decimal, method: str, recorded_by, reference: str = "", notes: str = ""
+) -> "Payment":  # noqa: F821
     """
     Record a manual payment against a bill and update its status.
 
@@ -127,6 +129,7 @@ def apply_payment(bill: Bill, amount: Decimal, method: str, recorded_by, referen
     bill.save(update_fields=["amount_paid", "status"])
 
     from django_q.tasks import async_task
+
     async_task("apps.notifications.tasks.notify_payment_received", str(payment.id))
 
     return payment
@@ -153,8 +156,10 @@ def get_active_leases_due_today() -> list:
             status=Lease.Status.ACTIVE,
             billing_day_of_month=today.day,
             start_date__lte=today,
-        ).select_related("organization", "unit", "tenant")
-        .filter(end_date__isnull=True) | Lease.objects.filter(
+        )
+        .select_related("organization", "unit", "tenant")
+        .filter(end_date__isnull=True)
+        | Lease.objects.filter(
             status=Lease.Status.ACTIVE,
             billing_day_of_month=today.day,
             start_date__lte=today,

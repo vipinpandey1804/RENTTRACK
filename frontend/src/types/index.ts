@@ -2,7 +2,7 @@ export interface Organization {
   id: string;
   name: string;
   slug: string;
-  tier: 'shared' | 'pooled' | 'dedicated';
+  tier: "shared" | "pooled" | "dedicated";
   primary_email: string;
   primary_phone?: string;
   gstin?: string;
@@ -12,7 +12,13 @@ export interface Organization {
 export interface Membership {
   id: string;
   organization: Organization;
-  role: 'owner' | 'property_manager' | 'accountant' | 'support' | 'tenant' | 'co_tenant';
+  role:
+    | "owner"
+    | "property_manager"
+    | "accountant"
+    | "support"
+    | "tenant"
+    | "co_tenant";
   is_active: boolean;
   created_at: string;
 }
@@ -32,7 +38,7 @@ export interface User {
 export interface Property {
   id: string;
   name: string;
-  property_type: 'residential' | 'commercial' | 'mixed';
+  property_type: "residential" | "commercial" | "mixed";
   address_line1: string;
   address_line2?: string;
   city: string;
@@ -58,7 +64,7 @@ export interface Unit {
   base_rent: string;
   security_deposit: string;
   electricity_meter_id?: string;
-  status: 'vacant' | 'occupied' | 'maintenance';
+  status: "vacant" | "occupied" | "maintenance";
   created_at: string;
   updated_at: string;
 }
@@ -74,12 +80,12 @@ export interface Lease {
   end_date?: string | null;
   monthly_rent: string;
   security_deposit_held: string;
-  billing_cycle: 'monthly' | 'quarterly' | 'yearly';
+  billing_cycle: "monthly" | "quarterly" | "yearly";
   billing_day_of_month: number;
   grace_period_days: number;
-  late_fee_type: 'flat' | 'percentage' | 'none';
+  late_fee_type: "flat" | "percentage" | "none";
   late_fee_value: string;
-  status: 'draft' | 'active' | 'ended' | 'terminated';
+  status: "draft" | "active" | "ended" | "terminated";
   notes?: string;
   is_active: boolean;
   created_at: string;
@@ -98,11 +104,17 @@ export interface ApiError {
   [key: string]: string | string[] | undefined;
 }
 
-export type NotificationStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'read';
+export type NotificationStatus =
+  | "pending"
+  | "sent"
+  | "delivered"
+  | "failed"
+  | "bounced"
+  | "read";
 
 export interface Notification {
   id: string;
-  channel: 'email' | 'sms' | 'whatsapp' | 'in_app' | 'push';
+  channel: "email" | "sms" | "whatsapp" | "in_app" | "push";
   event_type: string;
   subject: string;
   body: string;

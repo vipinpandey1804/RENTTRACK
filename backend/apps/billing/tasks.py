@@ -1,4 +1,5 @@
 """Background tasks for billing."""
+
 import logging
 from datetime import date
 
@@ -27,7 +28,9 @@ def generate_daily_bills():
 
     logger.info(
         "generate_daily_bills: %d generated, %d errors (total leases due: %d)",
-        generated, errors, len(leases),
+        generated,
+        errors,
+        len(leases),
     )
     return {"generated": generated, "errors": errors}
 

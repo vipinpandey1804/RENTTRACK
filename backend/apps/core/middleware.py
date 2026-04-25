@@ -6,9 +6,8 @@ makes it available via thread-local storage for downstream code
 (managers, signals, etc.). Also sets a Postgres session variable
 that RLS policies can reference.
 """
-import threading
 
-from django.db import connection
+import threading
 
 _thread_locals = threading.local()
 
