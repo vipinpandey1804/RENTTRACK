@@ -1,4 +1,5 @@
 """Billing serializers."""
+
 from decimal import Decimal
 
 from rest_framework import serializers
@@ -15,13 +16,21 @@ class BillLineItemSerializer(serializers.ModelSerializer):
 
 
 class PaymentSummarySerializer(serializers.ModelSerializer):
-    recorded_by_email = serializers.EmailField(source="recorded_by.email", read_only=True, default=None)
+    recorded_by_email = serializers.EmailField(
+        source="recorded_by.email", read_only=True, default=None
+    )
 
     class Meta:
         model = Payment
         fields = [
-            "id", "amount", "method", "status", "reference_number",
-            "paid_at", "notes", "recorded_by_email",
+            "id",
+            "amount",
+            "method",
+            "status",
+            "reference_number",
+            "paid_at",
+            "notes",
+            "recorded_by_email",
         ]
         read_only_fields = ["id", "recorded_by_email"]
 
@@ -58,8 +67,12 @@ class BillSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = [
-            "id", "bill_number", "balance_due", "amount_paid",
-            "created_at", "updated_at",
+            "id",
+            "bill_number",
+            "balance_due",
+            "amount_paid",
+            "created_at",
+            "updated_at",
         ]
 
     def get_lease_info(self, obj):

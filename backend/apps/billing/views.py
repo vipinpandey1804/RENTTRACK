@@ -1,15 +1,16 @@
 """Billing API views."""
+
 from django.shortcuts import get_object_or_404
+from django_q.tasks import async_task
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.accounts.permissions import IsOrgMember, IsOrgOwnerOrManager
-from apps.billing.models import Bill, BillLineItem
+from apps.billing.models import Bill
 from apps.billing.serializers import BillSerializer, GenerateBillSerializer, RecordPaymentSerializer
 from apps.billing.services import apply_payment, generate_rent_bill
-from django_q.tasks import async_task
 from apps.properties.models import Lease
 
 
@@ -32,9 +33,11 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         org = self.request.user.active_organization
         if not org:
             return Bill.objects.none()
-        qs = Bill.objects.filter(organization=org).select_related(
-            "lease__tenant", "lease__unit__property"
-        ).prefetch_related("line_items", "payments__recorded_by")
+        qs = (
+            Bill.objects.filter(organization=org)
+            .select_related("lease__tenant", "lease__unit__property")
+            .prefetch_related("line_items", "payments__recorded_by")
+        )
 
         status_filter = self.request.query_params.get("status")
         if status_filter:
@@ -58,7 +61,9 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
 
         return qs
 
-    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager])
+    @action(
+        detail=False, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager]
+    )
     def generate(self, request):
         """Manually generate a rent bill for a lease + period."""
         serializer = GenerateBillSerializer(data=request.data)
@@ -76,7 +81,9 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         async_task("apps.notifications.tasks.notify_bill_issued", str(bill.id))
         return Response(BillSerializer(bill).data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager])
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager]
+    )
     def record_payment(self, request, pk=None):
         """Record a manual payment against this bill."""
         bill = self.get_object()
@@ -106,7 +113,9 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         bill.refresh_from_db()
         return Response(BillSerializer(bill).data)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager])
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated, IsOrgOwnerOrManager]
+    )
     def cancel(self, request, pk=None):
         """Cancel a bill. Only DRAFT or ISSUED bills can be cancelled."""
         bill = self.get_object()

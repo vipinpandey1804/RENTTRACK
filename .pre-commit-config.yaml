@@ -22,3 +22,10 @@ repos:
       - id: prettier
         files: \.(ts|tsx|js|jsx|json|css|md|yml|yaml)$
         exclude: ^backend/
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: ^(frontend/node_modules|\.git)/

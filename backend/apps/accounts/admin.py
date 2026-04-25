@@ -1,4 +1,5 @@
 """Django admin configuration for the accounts app."""
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
@@ -17,8 +18,14 @@ class MembershipInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
-        "email", "first_name", "last_name", "email_verified", "phone_verified",
-        "active_organization", "is_staff", "date_joined",
+        "email",
+        "first_name",
+        "last_name",
+        "email_verified",
+        "phone_verified",
+        "active_organization",
+        "is_staff",
+        "date_joined",
     )
     list_filter = ("is_staff", "is_superuser", "email_verified", "phone_verified")
     search_fields = ("email", "first_name", "last_name")
@@ -29,15 +36,21 @@ class UserAdmin(BaseUserAdmin):
         ("Identity", {"fields": ("id", "email", "first_name", "last_name")}),
         ("Contact", {"fields": ("phone", "phone_verified", "email_verified")}),
         ("Organization", {"fields": ("active_organization",)}),
-        ("Access", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (
+            "Access",
+            {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+        ),
         ("Timestamps", {"fields": ("date_joined", "last_login")}),
         ("Security", {"fields": ("password",), "classes": ("collapse",)}),
     )
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("email", "first_name", "last_name", "password1", "password2"),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "first_name", "last_name", "password1", "password2"),
+            },
+        ),
     )
 
     inlines = [MembershipInline]
@@ -64,6 +77,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         if not obj.features:
             return "—"
         import json
+
         return format_html("<pre style='margin:0'>{}</pre>", json.dumps(obj.features, indent=2))
 
 
@@ -79,7 +93,15 @@ class MembershipAdmin(admin.ModelAdmin):
 
 @admin.register(Invite)
 class InviteAdmin(admin.ModelAdmin):
-    list_display = ("email", "organization", "role", "status", "invited_by", "expires_at", "created_at")
+    list_display = (
+        "email",
+        "organization",
+        "role",
+        "status",
+        "invited_by",
+        "expires_at",
+        "created_at",
+    )
     list_filter = ("status", "role", "organization")
     search_fields = ("email", "organization__name", "invited_by__email")
     readonly_fields = ("id", "token", "created_at", "updated_at")

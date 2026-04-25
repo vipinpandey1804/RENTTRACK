@@ -1,7 +1,7 @@
 """Tests for email verification flow (Issue #5)."""
+
 import pytest
 from django.core.cache import cache
-from django.urls import reverse
 
 from apps.accounts.models import User
 
@@ -26,6 +26,7 @@ class TestEmailVerification:
     def test_verify_email_with_valid_token(self, client):
         user = User.objects.create_user(email="v@test.com", password="pass1234567")
         import secrets
+
         token = secrets.token_urlsafe(32)
         cache.set(f"email_verification:{token}", str(user.id), 86400)
 
@@ -50,12 +51,15 @@ class TestEmailVerification:
     def test_verify_email_token_consumed_after_use(self, client):
         user = User.objects.create_user(email="once@test.com", password="pass1234567")
         import secrets
+
         token = secrets.token_urlsafe(32)
         cache.set(f"email_verification:{token}", str(user.id), 86400)
 
         client.post("/api/v1/auth/verify-email/", {"token": token}, content_type="application/json")
         # Second use must fail
-        resp = client.post("/api/v1/auth/verify-email/", {"token": token}, content_type="application/json")
+        resp = client.post(
+            "/api/v1/auth/verify-email/", {"token": token}, content_type="application/json"
+        )
         assert resp.status_code == 400
 
     def test_resend_verification_requires_auth(self, client):

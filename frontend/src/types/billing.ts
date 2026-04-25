@@ -12,7 +12,7 @@ export interface PaymentRecord {
   id: string;
   amount: string;
   method: string;
-  status: 'initiated' | 'pending' | 'success' | 'failed' | 'refunded';
+  status: "initiated" | "pending" | "success" | "failed" | "refunded";
   reference_number: string;
   paid_at: string | null;
   notes: string;
@@ -27,8 +27,19 @@ export interface LeaseInfo {
   property_name: string;
 }
 
-export type BillStatus = 'draft' | 'issued' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
-export type BillType = 'rent' | 'electricity' | 'water' | 'maintenance' | 'combined';
+export type BillStatus =
+  | "draft"
+  | "issued"
+  | "paid"
+  | "partially_paid"
+  | "overdue"
+  | "cancelled";
+export type BillType =
+  | "rent"
+  | "electricity"
+  | "water"
+  | "maintenance"
+  | "combined";
 
 export interface Bill {
   id: string;

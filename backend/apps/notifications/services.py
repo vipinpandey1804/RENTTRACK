@@ -3,13 +3,14 @@ Notification service — creates Notification records and dispatches email.
 
 Phase 1: email only. SMS/WhatsApp added in Phase 2.
 """
+
 import logging
 
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
 from django.utils import timezone
 
-from apps.notifications.models import Notification
+from apps.notifications.models import Notification, NotificationPreference
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,14 @@ PAYMENT_RECEIVED = "payment.received"
 INVITE_SENT = "invite.sent"
 WELCOME = "user.welcome"
 EMAIL_VERIFICATION = "user.email_verification"
+
+
+def _is_enabled(user, event_type: str, channel: str) -> bool:
+    """Return True if the user has this event×channel enabled (default: True)."""
+    pref = NotificationPreference.objects.filter(
+        user=user, event_type=event_type, channel=channel
+    ).first()
+    return pref.enabled if pref is not None else True
 
 
 def _create_notification(
@@ -77,6 +86,8 @@ def notify_bill_issued_sync(bill) -> Notification | None:
     """Create + send 'bill issued' email to the tenant synchronously (used in tests)."""
     lease = bill.lease
     tenant = lease.tenant
+    if not _is_enabled(tenant, BILL_ISSUED, Notification.Channel.EMAIL):
+        return None
     subject = f"Rent bill for {bill.period_start.strftime('%B %Y')} — ₹{bill.total_amount}"
     body = (
         f"Dear {tenant.first_name or tenant.email},\n\n"
@@ -161,6 +172,8 @@ def notify_payment_received_sync(payment) -> Notification | None:
     """Create + send 'payment received' email to the tenant."""
     bill = payment.bill
     tenant = bill.lease.tenant
+    if not _is_enabled(tenant, PAYMENT_RECEIVED, Notification.Channel.EMAIL):
+        return None
     subject = f"Payment of ₹{payment.amount} received — {bill.bill_number}"
     body = (
         f"Dear {tenant.first_name or tenant.email},\n\n"

@@ -1,4 +1,5 @@
 """Tests for overlapping lease validation (Issue #13)."""
+
 import pytest
 
 from apps.accounts.models import Membership, Organization, User
@@ -24,6 +25,7 @@ def owner(org):
 @pytest.fixture
 def owner_client(client, owner):
     from rest_framework_simplejwt.tokens import RefreshToken
+
     token = RefreshToken.for_user(owner)
     client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.access_token}"
     return client
@@ -43,9 +45,7 @@ def prop(org):
 
 @pytest.fixture
 def unit(prop, org):
-    return Unit.objects.create(
-        organization=org, property=prop, name="Flat 1A", base_rent=10000
-    )
+    return Unit.objects.create(organization=org, property=prop, name="Flat 1A", base_rent=10000)
 
 
 @pytest.fixture
@@ -72,17 +72,18 @@ class TestOverlappingLeaseValidation:
 
     def test_can_activate_draft_lease_on_vacant_unit(self, owner_client, unit, tenant, org):
         lease = Lease.objects.create(
-            organization=org, unit=unit, tenant=tenant,
-            start_date="2026-04-01", monthly_rent=10000,
+            organization=org,
+            unit=unit,
+            tenant=tenant,
+            start_date="2026-04-01",
+            monthly_rent=10000,
             status=Lease.Status.DRAFT,
         )
         resp = owner_client.post(f"/api/v1/properties/leases/{lease.id}/activate/")
         assert resp.status_code == 200
         assert resp.data["status"] == "active"
 
-    def test_activating_lease_on_occupied_unit_is_blocked(
-        self, owner_client, unit, tenant, org
-    ):
+    def test_activating_lease_on_occupied_unit_is_blocked(self, owner_client, unit, tenant, org):
         tenant2 = User.objects.create_user(email="t2@test.com", password="strongpassword1")
         Membership.objects.create(user=tenant2, organization=org, role=Membership.Role.TENANT)
 
@@ -91,8 +92,11 @@ class TestOverlappingLeaseValidation:
 
         # Second draft lease for same unit
         draft_lease = Lease.objects.create(
-            organization=org, unit=unit, tenant=tenant2,
-            start_date="2026-04-01", monthly_rent=10000,
+            organization=org,
+            unit=unit,
+            tenant=tenant2,
+            start_date="2026-04-01",
+            monthly_rent=10000,
             status=Lease.Status.DRAFT,
         )
         resp = owner_client.post(f"/api/v1/properties/leases/{draft_lease.id}/activate/")
@@ -106,8 +110,11 @@ class TestOverlappingLeaseValidation:
         Membership.objects.create(user=tenant2, organization=org, role=Membership.Role.TENANT)
         self._create_active_lease(unit, tenant, org)
         draft_lease = Lease.objects.create(
-            organization=org, unit=unit, tenant=tenant2,
-            start_date="2026-04-01", monthly_rent=10000,
+            organization=org,
+            unit=unit,
+            tenant=tenant2,
+            start_date="2026-04-01",
+            monthly_rent=10000,
             status=Lease.Status.DRAFT,
         )
         resp = owner_client.post(f"/api/v1/properties/leases/{draft_lease.id}/activate/")
@@ -119,21 +126,25 @@ class TestOverlappingLeaseValidation:
 
         # Ended lease on same unit — should NOT block
         Lease.objects.create(
-            organization=org, unit=unit, tenant=tenant,
-            start_date="2025-01-01", monthly_rent=10000,
+            organization=org,
+            unit=unit,
+            tenant=tenant,
+            start_date="2025-01-01",
+            monthly_rent=10000,
             status=Lease.Status.ENDED,
         )
         draft_lease = Lease.objects.create(
-            organization=org, unit=unit, tenant=tenant2,
-            start_date="2026-04-01", monthly_rent=10000,
+            organization=org,
+            unit=unit,
+            tenant=tenant2,
+            start_date="2026-04-01",
+            monthly_rent=10000,
             status=Lease.Status.DRAFT,
         )
         resp = owner_client.post(f"/api/v1/properties/leases/{draft_lease.id}/activate/")
         assert resp.status_code == 200
 
-    def test_activating_already_active_lease_returns_400(
-        self, owner_client, unit, tenant, org
-    ):
+    def test_activating_already_active_lease_returns_400(self, owner_client, unit, tenant, org):
         lease = self._create_active_lease(unit, tenant, org)
         resp = owner_client.post(f"/api/v1/properties/leases/{lease.id}/activate/")
         assert resp.status_code == 400

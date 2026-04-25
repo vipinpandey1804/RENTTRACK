@@ -1,6 +1,6 @@
 """Tests for billing API filters and date range (Issue #16 backend)."""
+
 import pytest
-from django.utils import timezone
 
 from apps.accounts.models import Membership, Organization, User
 from apps.billing.models import Bill, BillLineItem
@@ -26,6 +26,7 @@ def owner(org):
 @pytest.fixture
 def owner_client(client, owner):
     from rest_framework_simplejwt.tokens import RefreshToken
+
     token = RefreshToken.for_user(owner)
     client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.access_token}"
     return client
@@ -41,15 +42,21 @@ def tenant(org):
 @pytest.fixture
 def lease(org, tenant):
     prop = Property.objects.create(
-        organization=org, name="Billing Prop",
-        address_line1="1 St", city="Mumbai", state="MH", postal_code="400001",
+        organization=org,
+        name="Billing Prop",
+        address_line1="1 St",
+        city="Mumbai",
+        state="MH",
+        postal_code="400001",
     )
-    unit = Unit.objects.create(
-        organization=org, property=prop, name="Unit 1", base_rent=10000
-    )
+    unit = Unit.objects.create(organization=org, property=prop, name="Unit 1", base_rent=10000)
     return Lease.objects.create(
-        organization=org, unit=unit, tenant=tenant,
-        start_date="2026-01-01", monthly_rent=10000, status=Lease.Status.ACTIVE,
+        organization=org,
+        unit=unit,
+        tenant=tenant,
+        start_date="2026-01-01",
+        monthly_rent=10000,
+        status=Lease.Status.ACTIVE,
     )
 
 
@@ -140,18 +147,28 @@ class TestBillListFilters:
             name="Other Org", slug="other-org", primary_email="x@other.com"
         )
         other_user = User.objects.create_user(email="x@other.com", password="strongpassword1")
-        Membership.objects.create(user=other_user, organization=other_org, role=Membership.Role.OWNER)
+        Membership.objects.create(
+            user=other_user, organization=other_org, role=Membership.Role.OWNER
+        )
         other_prop = Property.objects.create(
-            organization=other_org, name="Other Prop",
-            address_line1="2 St", city="Delhi", state="DL", postal_code="110001",
+            organization=other_org,
+            name="Other Prop",
+            address_line1="2 St",
+            city="Delhi",
+            state="DL",
+            postal_code="110001",
         )
         other_unit = Unit.objects.create(
             organization=other_org, property=other_prop, name="U1", base_rent=5000
         )
         other_tenant = User.objects.create_user(email="ot@other.com", password="strongpassword1")
         other_lease = Lease.objects.create(
-            organization=other_org, unit=other_unit, tenant=other_tenant,
-            start_date="2026-01-01", monthly_rent=5000, status=Lease.Status.ACTIVE,
+            organization=other_org,
+            unit=other_unit,
+            tenant=other_tenant,
+            start_date="2026-01-01",
+            monthly_rent=5000,
+            status=Lease.Status.ACTIVE,
         )
         make_bill(other_org, other_lease, "OTHER-001", "2026-04-10")
         # Our org has no bills

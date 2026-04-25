@@ -5,6 +5,7 @@ This is where we are right now. Target: get a clean, working local development l
 ## Checklist
 
 ### Day 1-2: Repo & Infrastructure
+
 - [x] Monorepo structure (backend + frontend + docker)
 - [x] Docker Compose (Postgres + Redis + Mailhog + backend + frontend + Celery)
 - [x] CI workflow (lint + test + build)
@@ -13,6 +14,7 @@ This is where we are right now. Target: get a clean, working local development l
 - [ ] Pre-commit hooks installed
 
 ### Day 3-4: Django Foundation
+
 - [x] Project structure with modular apps
 - [x] Settings split: base / dev / prod / test
 - [x] Base models (TenantAwareModel, UUIDModel, TimeStampedModel, SoftDeleteModel)
@@ -23,6 +25,7 @@ This is where we are right now. Target: get a clean, working local development l
 - [ ] Admin panel accessible
 
 ### Day 5-6: Auth
+
 - [x] User + Organization + Membership models
 - [x] JWT login + refresh endpoints (stub)
 - [ ] Signup flow (with email verification via Mailhog)
@@ -32,6 +35,7 @@ This is where we are right now. Target: get a clean, working local development l
 - [ ] Auth tests
 
 ### Day 7-8: Frontend Bootstrap
+
 - [x] Vite + React + TypeScript + Tailwind
 - [x] React Router + React Query + Zustand
 - [x] Login page + protected routes
@@ -41,6 +45,7 @@ This is where we are right now. Target: get a clean, working local development l
 - [ ] E2E test for login flow
 
 ### Day 9-10: First Feature — Properties
+
 - [x] Property + Unit + Lease models
 - [ ] Property CRUD API
 - [ ] Property list + detail pages
@@ -55,6 +60,7 @@ Create a GitHub Milestone called "Phase 0" and convert each unchecked item above
 ## Exit criteria
 
 Phase 0 is done when:
+
 1. `docker-compose up` starts everything cleanly on a fresh checkout.
 2. A landlord can sign up, log in, create a property + unit, and invite a tenant via email.
 3. The tenant can accept the invite, complete signup, and see their unit in their dashboard.
