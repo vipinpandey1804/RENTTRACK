@@ -3,6 +3,7 @@ Notifications: multi-channel delivery (email, SMS, WhatsApp, in-app).
 
 Every outbound notification is persisted for audit + retry.
 """
+
 from django.db import models
 
 from apps.core.models import TenantAwareModel

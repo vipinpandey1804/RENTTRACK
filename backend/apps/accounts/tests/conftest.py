@@ -1,6 +1,6 @@
 """Shared fixtures for accounts tests."""
+
 import pytest
-from django.utils.text import slugify
 
 from apps.accounts.models import Membership, Organization, User
 

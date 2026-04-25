@@ -4,8 +4,8 @@ Accounts: Users, Organizations, Memberships, and Invites.
 A single User can belong to multiple Organizations (e.g., a PMC employee
 working for multiple property owners). Each membership carries a Role.
 """
+
 import secrets
-import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -163,9 +163,7 @@ class Invite(UUIDModel, TimeStampedModel):
         ACCEPTED = "accepted", "Accepted"
         EXPIRED = "expired", "Expired"
 
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="invites"
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="invites")
     invited_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="sent_invites"
     )

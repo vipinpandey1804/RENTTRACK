@@ -3,10 +3,11 @@ Notification service — creates Notification records and dispatches email.
 
 Phase 1: email only. SMS/WhatsApp added in Phase 2.
 """
+
 import logging
 
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
 from django.utils import timezone
 
 from apps.notifications.models import Notification

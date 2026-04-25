@@ -4,6 +4,7 @@ Local development settings — runs without Docker using SQLite.
 Use when you don't have PostgreSQL/Redis available:
   DJANGO_SETTINGS_MODULE=config.settings.local python manage.py runserver
 """
+
 from .dev import *  # noqa: F401, F403
 
 # SQLite — no Postgres needed

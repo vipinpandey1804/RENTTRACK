@@ -1,4 +1,5 @@
 """Property, Unit, and Lease CRUD viewsets with tenant scoping."""
+
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -115,10 +116,14 @@ class LeaseViewSet(OrgScopedMixin, viewsets.ModelViewSet):
             )
 
         # Prevent double-booking: no other ACTIVE lease may exist for the same unit
-        conflict = Lease.objects.filter(
-            unit=lease.unit,
-            status=Lease.Status.ACTIVE,
-        ).exclude(pk=lease.pk).first()
+        conflict = (
+            Lease.objects.filter(
+                unit=lease.unit,
+                status=Lease.Status.ACTIVE,
+            )
+            .exclude(pk=lease.pk)
+            .first()
+        )
         if conflict:
             return Response(
                 {

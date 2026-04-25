@@ -2,13 +2,13 @@
 
 ## Overview
 
-| Layer | Technology | Dev URL |
-|-------|-----------|---------|
-| Frontend | React 18 + Vite + TypeScript | `http://localhost:5173` |
-| Backend | Django 5.2 + DRF | `http://localhost:8000` |
-| Database | PostgreSQL | `localhost:5432` |
-| Cache | Redis | `localhost:6379` |
-| Task queue | Django Q2 (ORM broker) | runs via `qcluster` |
+| Layer      | Technology                   | Dev URL                 |
+| ---------- | ---------------------------- | ----------------------- |
+| Frontend   | React 18 + Vite + TypeScript | `http://localhost:5173` |
+| Backend    | Django 5.2 + DRF             | `http://localhost:8000` |
+| Database   | PostgreSQL                   | `localhost:5432`        |
+| Cache      | Redis                        | `localhost:6379`        |
+| Task queue | Django Q2 (ORM broker)       | runs via `qcluster`     |
 
 ---
 
@@ -59,12 +59,13 @@ JWT_REFRESH_TOKEN_LIFETIME_DAYS=30
 The backend allows cross-origin requests from the frontend via `django-cors-headers`.
 
 In `config/settings/base.py`:
+
 ```python
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")   # ["http://localhost:5173"]
 CORS_ALLOW_CREDENTIALS = True
 ```
 
-Set `CORS_ALLOWED_ORIGINS=http://localhost:5173` in `.env` for local dev.  
+Set `CORS_ALLOWED_ORIGINS=http://localhost:5173` in `.env` for local dev.
 In production, set it to your deployed frontend domain (e.g., `https://app.renttrack.com`).
 
 ---
@@ -83,6 +84,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 { "access": "<jwt-access-token>", "refresh": "<jwt-refresh-token>" }
 ```
@@ -134,61 +136,61 @@ All endpoints are prefixed with `/api/v1/`.
 
 ### Auth — `/api/v1/auth/`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `login/` | Obtain JWT access + refresh tokens |
-| POST | `refresh/` | Refresh access token |
-| POST | `signup/` | Register new user + organization |
-| POST | `logout/` | Blacklist refresh token |
-| GET | `me/` | Current user profile |
-| PATCH | `me/` | Update profile |
-| POST | `me/change-password/` | Change password |
-| POST | `verify-email/` | Verify email with token |
-| POST | `resend-verification/` | Resend verification email |
-| POST | `invite/` | Send member invite |
-| GET | `invite/<token>/` | Validate invite token |
-| POST | `accept-invite/` | Accept invite and join org |
-| GET | `members/` | List org members |
-| POST | `switch-org/` | Switch active organization |
+| Method | Path                   | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| POST   | `login/`               | Obtain JWT access + refresh tokens |
+| POST   | `refresh/`             | Refresh access token               |
+| POST   | `signup/`              | Register new user + organization   |
+| POST   | `logout/`              | Blacklist refresh token            |
+| GET    | `me/`                  | Current user profile               |
+| PATCH  | `me/`                  | Update profile                     |
+| POST   | `me/change-password/`  | Change password                    |
+| POST   | `verify-email/`        | Verify email with token            |
+| POST   | `resend-verification/` | Resend verification email          |
+| POST   | `invite/`              | Send member invite                 |
+| GET    | `invite/<token>/`      | Validate invite token              |
+| POST   | `accept-invite/`       | Accept invite and join org         |
+| GET    | `members/`             | List org members                   |
+| POST   | `switch-org/`          | Switch active organization         |
 
 ### Properties — `/api/v1/properties/`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/properties/` | List properties |
-| POST | `/api/v1/properties/` | Create property |
-| GET | `/api/v1/properties/<id>/` | Get property |
-| PATCH | `/api/v1/properties/<id>/` | Update property |
-| GET | `/api/v1/properties/units/` | List units |
-| POST | `/api/v1/properties/units/` | Create unit |
-| GET | `/api/v1/properties/units/<id>/` | Get unit |
-| GET | `/api/v1/properties/leases/` | List leases |
-| POST | `/api/v1/properties/leases/` | Create lease |
-| GET | `/api/v1/properties/leases/<id>/` | Get lease |
+| Method | Path                              | Description     |
+| ------ | --------------------------------- | --------------- |
+| GET    | `/api/v1/properties/`             | List properties |
+| POST   | `/api/v1/properties/`             | Create property |
+| GET    | `/api/v1/properties/<id>/`        | Get property    |
+| PATCH  | `/api/v1/properties/<id>/`        | Update property |
+| GET    | `/api/v1/properties/units/`       | List units      |
+| POST   | `/api/v1/properties/units/`       | Create unit     |
+| GET    | `/api/v1/properties/units/<id>/`  | Get unit        |
+| GET    | `/api/v1/properties/leases/`      | List leases     |
+| POST   | `/api/v1/properties/leases/`      | Create lease    |
+| GET    | `/api/v1/properties/leases/<id>/` | Get lease       |
 
 ### Billing — `/api/v1/billing/`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `bills/` | List bills (filterable) |
-| GET | `bills/<id>/` | Get bill detail |
-| POST | `bills/generate/` | Manually generate a bill |
-| POST | `bills/<id>/record-payment/` | Record a payment against a bill |
-| POST | `bills/<id>/cancel/` | Cancel a bill |
+| Method | Path                         | Description                     |
+| ------ | ---------------------------- | ------------------------------- |
+| GET    | `bills/`                     | List bills (filterable)         |
+| GET    | `bills/<id>/`                | Get bill detail                 |
+| POST   | `bills/generate/`            | Manually generate a bill        |
+| POST   | `bills/<id>/record-payment/` | Record a payment against a bill |
+| POST   | `bills/<id>/cancel/`         | Cancel a bill                   |
 
 ### Payments — `/api/v1/payments/`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/payments/` | List payments |
-| GET | `/api/v1/payments/<id>/` | Get payment detail |
+| Method | Path                     | Description        |
+| ------ | ------------------------ | ------------------ |
+| GET    | `/api/v1/payments/`      | List payments      |
+| GET    | `/api/v1/payments/<id>/` | Get payment detail |
 
 ### Notifications — `/api/v1/notifications/`
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/v1/notifications/` | List notifications |
-| GET | `/api/v1/notifications/<id>/` | Get notification |
+| Method | Path                          | Description        |
+| ------ | ----------------------------- | ------------------ |
+| GET    | `/api/v1/notifications/`      | List notifications |
+| GET    | `/api/v1/notifications/<id>/` | Get notification   |
 
 ### Health — `/health/`
 
@@ -202,11 +204,11 @@ GET /health/    → { "status": "ok" }
 
 The backend auto-generates OpenAPI 3.0 docs via `drf-spectacular`.
 
-| URL | Description |
-|-----|-------------|
+| URL                                 | Description           |
+| ----------------------------------- | --------------------- |
 | `http://localhost:8000/api/schema/` | Raw OpenAPI JSON/YAML |
-| `http://localhost:8000/api/docs/` | Swagger UI |
-| `http://localhost:8000/api/redoc/` | ReDoc UI |
+| `http://localhost:8000/api/docs/`   | Swagger UI            |
+| `http://localhost:8000/api/redoc/`  | ReDoc UI              |
 
 Use the Swagger UI to explore request/response shapes, test endpoints interactively, and copy the exact field names for TypeScript types.
 
@@ -243,7 +245,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(err);
-  }
+  },
 );
 ```
 
@@ -264,7 +266,9 @@ export function useBills(filters?: { status?: string }) {
   return useQuery({
     queryKey: ["bills", filters],
     queryFn: () =>
-      api.get("/api/v1/billing/bills/", { params: filters }).then((r) => r.data),
+      api
+        .get("/api/v1/billing/bills/", { params: filters })
+        .then((r) => r.data),
   });
 }
 ```
@@ -309,11 +313,11 @@ Pass `?page=2` to fetch the next page.
 
 Most list endpoints support:
 
-| Query param | Example | Description |
-|-------------|---------|-------------|
-| `search` | `?search=john` | Full-text search on indexed fields |
-| `ordering` | `?ordering=-due_date` | Sort (prefix `-` for descending) |
-| Status/field filters | `?status=overdue` | Exact filter on filterable fields |
+| Query param          | Example               | Description                        |
+| -------------------- | --------------------- | ---------------------------------- |
+| `search`             | `?search=john`        | Full-text search on indexed fields |
+| `ordering`           | `?ordering=-due_date` | Sort (prefix `-` for descending)   |
+| Status/field filters | `?status=overdue`     | Exact filter on filterable fields  |
 
 ---
 
@@ -342,13 +346,13 @@ Handle both shapes in your API error handler.
 
 The following tasks run asynchronously via `python manage.py qcluster`:
 
-| Task | Trigger | Description |
-|------|---------|-------------|
-| `notify_bill_issued` | On bill creation | Sends email to tenant |
-| `notify_payment_received` | On payment recorded | Sends receipt email |
-| `dispatch_notification` | On notification enqueued | Generic email dispatch |
-| `generate_daily_bills` | Cron — 06:00 IST | Auto-generate rent bills |
-| `mark_overdue_bills_task` | Cron — 00:05 IST | Mark unpaid bills as overdue |
+| Task                      | Trigger                  | Description                  |
+| ------------------------- | ------------------------ | ---------------------------- |
+| `notify_bill_issued`      | On bill creation         | Sends email to tenant        |
+| `notify_payment_received` | On payment recorded      | Sends receipt email          |
+| `dispatch_notification`   | On notification enqueued | Generic email dispatch       |
+| `generate_daily_bills`    | Cron — 06:00 IST         | Auto-generate rent bills     |
+| `mark_overdue_bills_task` | Cron — 00:05 IST         | Mark unpaid bills as overdue |
 
 In development you can skip running `qcluster`; task calls are non-blocking and fail silently if the queue is not consumed.
 

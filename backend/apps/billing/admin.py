@@ -1,4 +1,5 @@
 """Django admin configuration for the billing app."""
+
 from django.contrib import admin
 
 from apps.billing.models import Bill, BillLineItem
@@ -14,8 +15,15 @@ class BillLineItemInline(admin.TabularInline):
 @admin.register(Bill)
 class BillAdmin(admin.ModelAdmin):
     list_display = (
-        "bill_number", "organization", "lease_tenant", "bill_type", "status",
-        "total_amount", "balance_due", "due_date", "issue_date",
+        "bill_number",
+        "organization",
+        "lease_tenant",
+        "bill_type",
+        "status",
+        "total_amount",
+        "balance_due",
+        "due_date",
+        "issue_date",
     )
     list_filter = ("status", "bill_type", "organization")
     search_fields = ("bill_number", "lease__tenant__email", "lease__unit__name")
@@ -27,7 +35,10 @@ class BillAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Identity", {"fields": ("id", "bill_number", "organization", "lease", "bill_type")}),
         ("Period", {"fields": ("period_start", "period_end", "issue_date", "due_date")}),
-        ("Amounts", {"fields": ("subtotal", "tax_amount", "total_amount", "amount_paid", "balance_due")}),
+        (
+            "Amounts",
+            {"fields": ("subtotal", "tax_amount", "total_amount", "amount_paid", "balance_due")},
+        ),
         ("State", {"fields": ("status", "pdf_url", "notes")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )
