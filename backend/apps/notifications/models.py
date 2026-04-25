@@ -57,3 +57,41 @@ class Notification(TenantAwareModel):
 
     def __str__(self):
         return f"{self.channel} to {self.recipient.email}: {self.event_type}"
+
+
+# Event types that users can toggle preferences for
+PREFERENCE_EVENTS = [
+    ("bill.issued", "Bill issued"),
+    ("bill.overdue", "Bill overdue"),
+    ("payment.received", "Payment received"),
+]
+
+# Channels available for user preferences
+PREFERENCE_CHANNELS = [
+    ("email", "Email"),
+    ("sms", "SMS"),
+]
+
+
+class NotificationPreference(models.Model):
+    """Per-user toggle for each event × channel combination."""
+
+    user = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="notification_preferences",
+    )
+    event_type = models.CharField(max_length=100)
+    channel = models.CharField(max_length=20)
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "notification_preferences"
+        unique_together = [("user", "event_type", "channel")]
+        indexes = [
+            models.Index(fields=["user", "event_type"]),
+        ]
+
+    def __str__(self):
+        state = "on" if self.enabled else "off"
+        return f"{self.user.email} {self.event_type}/{self.channel}: {state}"
