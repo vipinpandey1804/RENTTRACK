@@ -1,5 +1,9 @@
 """Billing API views."""
 
+import os
+
+from django.conf import settings
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_q.tasks import async_task
 from rest_framework import filters, status, viewsets
@@ -79,6 +83,7 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
 
         bill = generate_rent_bill(lease, serializer.validated_data["period_date"])
         async_task("apps.notifications.tasks.notify_bill_issued", str(bill.id))
+        async_task("apps.billing.tasks.generate_bill_pdf_task", str(bill.id))
         return Response(BillSerializer(bill).data, status=status.HTTP_201_CREATED)
 
     @action(
@@ -127,3 +132,25 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
         bill.status = Bill.Status.CANCELLED
         bill.save(update_fields=["status"])
         return Response(BillSerializer(bill).data)
+
+    @action(detail=True, methods=["get"])
+    def pdf(self, request, pk=None):
+        """Download the PDF for this bill. Returns 202 if still generating."""
+        bill = self.get_object()
+
+        abs_path = os.path.join(settings.MEDIA_ROOT, "bills", f"{bill.id}.pdf")
+
+        if not os.path.exists(abs_path):
+            if not bill.pdf_url:
+                return Response(
+                    {"detail": "PDF is being generated, please try again shortly."},
+                    status=status.HTTP_202_ACCEPTED,
+                )
+            return Response({"detail": "PDF file not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        return FileResponse(
+            open(abs_path, "rb"),  # noqa: WPS515
+            content_type="application/pdf",
+            as_attachment=True,
+            filename=f"{bill.bill_number}.pdf",
+        )

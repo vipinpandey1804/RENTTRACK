@@ -26,6 +26,9 @@ drf-spectacular==0.29.0
 django-storages==1.14.6
 boto3==1.42.93
 
+# ===== PDF =====
+reportlab==4.4.10
+
 # ===== Utilities =====
 Pillow==12.2.0
 python-dateutil==2.9.0.post0
