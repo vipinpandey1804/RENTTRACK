@@ -60,6 +60,7 @@ class TenantAwareManager(models.Manager):
 ### 3. Middleware
 
 `TenantContextMiddleware` runs before every view:
+
 - Reads JWT claim `org`
 - Sets thread-local `organization_id`
 - Sets Postgres session variable `app.current_org` (used by RLS)
@@ -79,15 +80,16 @@ Even a raw SQL query from a buggy admin tool cannot return rows from another ten
 
 ## Tiers
 
-| Tier | DB isolation | Who |
-|---|---|---|
-| **Shared** | Same cluster, same schema, RLS-enforced | Free/Pro |
-| **Pooled** | Same cluster, dedicated schema per org | Business |
+| Tier          | DB isolation                             | Who        |
+| ------------- | ---------------------------------------- | ---------- |
+| **Shared**    | Same cluster, same schema, RLS-enforced  | Free/Pro   |
+| **Pooled**    | Same cluster, dedicated schema per org   | Business   |
 | **Dedicated** | Dedicated RDS instance + Redis namespace | Enterprise |
 
 ## Testing
 
 Every PR that touches a tenant-scoped model must include a test that:
+
 1. Creates two organizations, A and B.
 2. Creates data in both.
 3. Sets context to A and asserts that B's data is invisible.
@@ -97,6 +99,7 @@ See `backend/apps/core/tests/test_tenancy.py` for the reference pattern.
 ## Breaking changes
 
 Anything that weakens tenant isolation — even temporarily — is a breaking change. It requires:
+
 - An ADR documenting why
 - Security review
 - Rollback plan

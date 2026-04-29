@@ -1,4 +1,5 @@
 """RBAC permission classes for RentTrack."""
+
 from rest_framework.permissions import BasePermission
 
 from apps.accounts.models import Membership

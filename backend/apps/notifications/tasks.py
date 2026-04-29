@@ -1,4 +1,5 @@
 """Background tasks for notification dispatch."""
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,12 +18,12 @@ def notify_bill_issued(bill_id: str):
 
 def notify_payment_received(payment_id: str):
     """Async: send 'payment received' email to the tenant."""
-    from apps.payments.models import Payment
     from apps.notifications.services import notify_payment_received_sync
+    from apps.payments.models import Payment
 
-    payment = Payment.objects.select_related(
-        "bill__lease__tenant", "bill__organization"
-    ).get(id=payment_id)
+    payment = Payment.objects.select_related("bill__lease__tenant", "bill__organization").get(
+        id=payment_id
+    )
     notify_payment_received_sync(payment)
 
 
@@ -37,6 +38,4 @@ def dispatch_notification(notification_id: str):
     if notification.channel == Notification.Channel.EMAIL:
         send_email(notification)
     else:
-        logger.warning(
-            "dispatch_notification: channel %s not yet supported", notification.channel
-        )
+        logger.warning("dispatch_notification: channel %s not yet supported", notification.channel)

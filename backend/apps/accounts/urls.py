@@ -1,4 +1,5 @@
 """Auth and accounts API URLs."""
+
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -7,8 +8,8 @@ from apps.accounts.views import (
     ChangePasswordView,
     InviteView,
     LogoutView,
-    MeView,
     MembersView,
+    MeView,
     ResendVerificationView,
     SignupView,
     SwitchOrgView,

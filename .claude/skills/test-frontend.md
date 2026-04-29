@@ -14,17 +14,21 @@ Run Playwright end-to-end tests for the RentTrack frontend. Use this skill after
 When invoked, execute the following steps in order:
 
 ### Step 1 — Type-check the frontend first
+
 ```
 !cd /home/user/RENTTRACK/frontend && npm run typecheck 2>&1
 ```
+
 If type errors are found, report them and stop — fix types before running e2e.
 
 ### Step 2 — Run Playwright tests in headed-less mode
+
 ```
 !cd /home/user/RENTTRACK/frontend && PLAYWRIGHT_BASE_URL=http://localhost:5173 npx playwright test --reporter=list 2>&1
 ```
 
 If the dev server is not running (connection refused), inform the user:
+
 > The frontend dev server is not running. Start it with `cd frontend && npm run dev` in another terminal, then re-run `/test-frontend`.
 
 ### Step 3 — Summarise results
@@ -32,9 +36,10 @@ If the dev server is not running (connection refused), inform the user:
 After running, produce a summary table:
 
 | Spec file | Tests | Passed | Failed | Skipped |
-|-----------|-------|--------|--------|---------|
+| --------- | ----- | ------ | ------ | ------- |
 
 For every **failed** test, show:
+
 - Test name
 - Error message (first 5 lines)
 - File + line number from the stack trace
@@ -46,15 +51,16 @@ For every **failed** test, show:
 
 ## Scope of tests
 
-| Spec | Covers |
-|------|--------|
-| `auth.spec.ts` | Login, signup, email verification banner, protected route redirects |
-| `billing.spec.ts` | Bill table rendering, status tabs, search, date range filter, pagination, generate-bill modal |
-| `tenant-dashboard.spec.ts` | Role-based routing, lease card, outstanding bills, empty states |
+| Spec                       | Covers                                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| `auth.spec.ts`             | Login, signup, email verification banner, protected route redirects                           |
+| `billing.spec.ts`          | Bill table rendering, status tabs, search, date range filter, pagination, generate-bill modal |
+| `tenant-dashboard.spec.ts` | Role-based routing, lease card, outstanding bills, empty states                               |
 
 ## Adding new tests
 
 When implementing a new frontend module, add a corresponding spec in `frontend/e2e/<module>.spec.ts` following the pattern in existing specs:
+
 - Use `seedAuth()` or `seedTenantAuth()` from `helpers.ts` to avoid real login
 - Use `mockApi()` from `helpers.ts` to intercept backend calls
 - Test rendering, interactions, URL sync, and empty states

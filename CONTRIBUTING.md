@@ -42,12 +42,14 @@ git push origin feat/amazing-feature
 ## Code style
 
 ### Python / Django
+
 - `ruff` for linting and formatting (pre-commit will run automatically).
 - `mypy` for type checking — please add type hints to new code.
 - Use `TenantAwareModel` as the base for any business model.
 - Querysets on business data must be filtered by `organization_id` — never assume global scope.
 
 ### TypeScript / React
+
 - Functional components with hooks only.
 - Tailwind for styling — no separate CSS files unless necessary.
 - Colocate related files: a page's component, hooks, and types live together.

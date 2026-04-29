@@ -1,6 +1,13 @@
-"""metering API URLs - TODO: implement viewsets."""
-from django.urls import path
+"""Metering API URLs."""
+
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from apps.metering.views import MeterReadingViewSet
+
+router = DefaultRouter()
+router.register("readings", MeterReadingViewSet, basename="meter-reading")
 
 urlpatterns = [
-    # TODO: add viewset routes
+    path("", include(router.urls)),
 ]

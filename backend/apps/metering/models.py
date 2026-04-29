@@ -4,6 +4,7 @@ Metering: meter readings and consumption tracking.
 Readings flow: tenant submits -> optional OCR -> landlord confirms -> locked.
 Once confirmed, a bill is generated from (current - previous) * rate.
 """
+
 from django.db import models
 
 from apps.core.models import TenantAwareModel
@@ -37,16 +38,16 @@ class MeterReading(TenantAwareModel):
     ocr_extracted_value = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True
     )
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.SUBMITTED
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.SUBMITTED)
     submitted_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True,
-        related_name="submitted_readings"
+        "accounts.User", on_delete=models.SET_NULL, null=True, related_name="submitted_readings"
     )
     confirmed_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="confirmed_readings"
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="confirmed_readings",
     )
     confirmed_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)

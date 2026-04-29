@@ -3,6 +3,7 @@ Payments: gateway integrations, reconciliation, and receipts.
 
 Every payment is tied to a Bill and carries an immutable audit trail.
 """
+
 from django.db import models
 
 from apps.core.models import TenantAwareModel
@@ -26,14 +27,10 @@ class Payment(TenantAwareModel):
         FAILED = "failed", "Failed"
         REFUNDED = "refunded", "Refunded"
 
-    bill = models.ForeignKey(
-        "billing.Bill", on_delete=models.PROTECT, related_name="payments"
-    )
+    bill = models.ForeignKey("billing.Bill", on_delete=models.PROTECT, related_name="payments")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     method = models.CharField(max_length=20, choices=Method.choices)
-    status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.INITIATED
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INITIATED)
     reference_number = models.CharField(max_length=100, blank=True, db_index=True)
     idempotency_key = models.CharField(max_length=100, blank=True, unique=True, null=True)
 
@@ -44,8 +41,11 @@ class Payment(TenantAwareModel):
     gateway_response = models.JSONField(default=dict, blank=True)
 
     recorded_by = models.ForeignKey(
-        "accounts.User", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="recorded_payments"
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="recorded_payments",
     )
     paid_at = models.DateTimeField(null=True, blank=True)
     receipt_url = models.URLField(blank=True)

@@ -1,4 +1,5 @@
 """Health check endpoints for Kubernetes and uptime monitoring."""
+
 from django.db import connection
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes

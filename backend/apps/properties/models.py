@@ -3,10 +3,11 @@ Properties: buildings, individual units within them, and leases.
 
 Hierarchy: Organization → Property → Unit → Lease (with Tenant).
 """
+
 from django.db import models
 from django.utils import timezone
 
-from apps.core.models import TenantAwareModel, SoftDeleteModel
+from apps.core.models import SoftDeleteModel, TenantAwareModel
 
 
 class Property(TenantAwareModel, SoftDeleteModel):
@@ -31,8 +32,7 @@ class Property(TenantAwareModel, SoftDeleteModel):
 
     # Tariff defaults (can be overridden per unit)
     electricity_rate_per_unit = models.DecimalField(
-        max_digits=8, decimal_places=2, default=0,
-        help_text="Default per-unit rate in INR"
+        max_digits=8, decimal_places=2, default=0, help_text="Default per-unit rate in INR"
     )
 
     class Meta:
@@ -54,9 +54,7 @@ class Unit(TenantAwareModel, SoftDeleteModel):
         OCCUPIED = "occupied", "Occupied"
         MAINTENANCE = "maintenance", "Under Maintenance"
 
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name="units"
-    )
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="units")
     name = models.CharField(max_length=100, help_text="e.g., 'Flat 3B', 'Shop 2'")
     floor = models.IntegerField(null=True, blank=True)
     area_sqft = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
@@ -93,9 +91,7 @@ class Lease(TenantAwareModel):
         YEARLY = "yearly", "Yearly"
 
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name="leases")
-    tenant = models.ForeignKey(
-        "accounts.User", on_delete=models.PROTECT, related_name="leases"
-    )
+    tenant = models.ForeignKey("accounts.User", on_delete=models.PROTECT, related_name="leases")
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     monthly_rent = models.DecimalField(max_digits=10, decimal_places=2)

@@ -1,17 +1,17 @@
 """Auth and accounts API views."""
+
 import logging
 
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import Invite, Membership, Organization, User
+from apps.accounts.models import Invite, Membership, User
 from apps.accounts.permissions import IsOrgOwner
 from apps.accounts.serializers import (
     AcceptInviteSerializer,
@@ -25,7 +25,7 @@ from apps.accounts.serializers import (
 logger = logging.getLogger(__name__)
 
 _VERIFICATION_TTL = 86_400  # 24 hours in seconds
-_OTP_TTL = 600              # 10 minutes
+_OTP_TTL = 600  # 10 minutes
 
 
 def _verification_cache_key(token: str) -> str:
@@ -35,12 +35,14 @@ def _verification_cache_key(token: str) -> str:
 def _send_verification(user):
     """Generate a token, cache it, and dispatch the verification email."""
     import secrets
+
     token = secrets.token_urlsafe(32)
     cache.set(_verification_cache_key(token), str(user.id), _VERIFICATION_TTL)
     frontend_base = getattr(settings, "FRONTEND_URL", "http://localhost:5173")
     verification_url = f"{frontend_base}/verify-email/{token}"
     try:
         from apps.notifications.services import send_verification_email
+
         send_verification_email(user, verification_url)
     except Exception:
         logger.exception("Failed to send verification email for user %s", user.id)
@@ -67,6 +69,7 @@ class SignupView(APIView):
 
 class VerifyEmailView(APIView):
     """Consume a single-use email verification token."""
+
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -95,6 +98,7 @@ class VerifyEmailView(APIView):
 
 class ResendVerificationView(APIView):
     """Re-send the email verification link for the authenticated user."""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -155,6 +159,7 @@ class ChangePasswordView(APIView):
 
 class InviteView(APIView):
     """Create a token-based invite for a new tenant. Owner-only."""
+
     permission_classes = [IsAuthenticated, IsOrgOwner]
 
     @transaction.atomic
@@ -197,6 +202,7 @@ class InviteView(APIView):
         invite_url = f"{frontend_base}/accept-invite/{invite.token}"
         try:
             from apps.notifications.services import send_invite_email
+
             send_invite_email(invite, invite_url)
         except Exception:
             logger.exception("Failed to send invite email for invite %s", invite.id)
@@ -215,6 +221,7 @@ class InviteView(APIView):
 
 class ValidateInviteView(APIView):
     """Public: validate an invite token before showing the signup form."""
+
     permission_classes = [AllowAny]
 
     def get(self, request, token):
@@ -236,6 +243,7 @@ class ValidateInviteView(APIView):
 
 class AcceptInviteView(APIView):
     """Public: complete signup via an invite token."""
+
     permission_classes = [AllowAny]
 
     @transaction.atomic
@@ -300,6 +308,7 @@ class AcceptInviteView(APIView):
 
 class MembersView(APIView):
     """List all members of the current org."""
+
     permission_classes = [IsAuthenticated, IsOrgOwner]
 
     def get(self, request):
@@ -314,6 +323,7 @@ class MembersView(APIView):
 
 class SwitchOrgView(APIView):
     """Switch the user's active organization."""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

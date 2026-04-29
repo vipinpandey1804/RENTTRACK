@@ -1,4 +1,5 @@
 """Django admin configuration for the properties app."""
+
 from django.contrib import admin
 
 from apps.properties.models import Lease, Property, Unit
@@ -15,8 +16,14 @@ class UnitInline(admin.TabularInline):
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
     list_display = (
-        "name", "organization", "property_type", "city", "state",
-        "unit_count", "is_deleted", "created_at",
+        "name",
+        "organization",
+        "property_type",
+        "city",
+        "state",
+        "unit_count",
+        "is_deleted",
+        "created_at",
     )
     list_filter = ("property_type", "is_deleted", "organization")
     search_fields = ("name", "city", "state", "address_line1")
@@ -26,7 +33,19 @@ class PropertyAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Identity", {"fields": ("id", "organization", "name", "property_type")}),
-        ("Address", {"fields": ("address_line1", "address_line2", "city", "state", "postal_code", "country")}),
+        (
+            "Address",
+            {
+                "fields": (
+                    "address_line1",
+                    "address_line2",
+                    "city",
+                    "state",
+                    "postal_code",
+                    "country",
+                )
+            },
+        ),
         ("Tariffs", {"fields": ("electricity_rate_per_unit",)}),
         ("State", {"fields": ("is_deleted",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
@@ -42,8 +61,14 @@ class PropertyAdmin(admin.ModelAdmin):
 @admin.register(Unit)
 class UnitAdmin(admin.ModelAdmin):
     list_display = (
-        "name", "property", "organization", "base_rent", "status",
-        "bedrooms", "electricity_meter_id", "is_deleted",
+        "name",
+        "property",
+        "organization",
+        "base_rent",
+        "status",
+        "bedrooms",
+        "electricity_meter_id",
+        "is_deleted",
     )
     list_filter = ("status", "is_deleted", "organization")
     search_fields = ("name", "property__name", "electricity_meter_id")
@@ -55,8 +80,14 @@ class UnitAdmin(admin.ModelAdmin):
 @admin.register(Lease)
 class LeaseAdmin(admin.ModelAdmin):
     list_display = (
-        "tenant", "unit", "organization", "monthly_rent", "status",
-        "start_date", "end_date", "billing_cycle",
+        "tenant",
+        "unit",
+        "organization",
+        "monthly_rent",
+        "status",
+        "start_date",
+        "end_date",
+        "billing_cycle",
     )
     list_filter = ("status", "billing_cycle", "organization")
     search_fields = ("tenant__email", "tenant__first_name", "unit__name", "unit__property__name")
@@ -66,8 +97,30 @@ class LeaseAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Parties", {"fields": ("id", "organization", "unit", "tenant")}),
-        ("Terms", {"fields": ("monthly_rent", "security_deposit_held", "start_date", "end_date", "status")}),
-        ("Billing", {"fields": ("billing_cycle", "billing_day_of_month", "grace_period_days", "late_fee_type", "late_fee_value")}),
+        (
+            "Terms",
+            {
+                "fields": (
+                    "monthly_rent",
+                    "security_deposit_held",
+                    "start_date",
+                    "end_date",
+                    "status",
+                )
+            },
+        ),
+        (
+            "Billing",
+            {
+                "fields": (
+                    "billing_cycle",
+                    "billing_day_of_month",
+                    "grace_period_days",
+                    "late_fee_type",
+                    "late_fee_value",
+                )
+            },
+        ),
         ("Notes", {"fields": ("notes",)}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
     )

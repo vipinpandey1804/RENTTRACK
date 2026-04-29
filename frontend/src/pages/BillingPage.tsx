@@ -1,23 +1,27 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { format } from 'date-fns';
-import AppShell from '@/components/layout/AppShell';
-import StatusBadge from '@/components/ui/StatusBadge';
-import Button from '@/components/ui/Button';
-import Modal from '@/components/ui/Modal';
-import Input from '@/components/ui/Input';
-import { toast } from '@/components/ui/Toast';
-import { useBills, useGenerateBill, type BillFilters } from '@/hooks/useBilling';
-import { useLeases } from '@/hooks/useProperties';
-import type { Bill, BillStatus } from '@/types/billing';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
+import AppShell from "@/components/layout/AppShell";
+import StatusBadge from "@/components/ui/StatusBadge";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import { toast } from "@/components/ui/Toast";
+import {
+  useBills,
+  useGenerateBill,
+  type BillFilters,
+} from "@/hooks/useBilling";
+import { useLeases } from "@/hooks/useProperties";
+import type { Bill, BillStatus } from "@/types/billing";
 
-const STATUS_TABS: { label: string; value: BillStatus | '' }[] = [
-  { label: 'All', value: '' },
-  { label: 'Issued', value: 'issued' },
-  { label: 'Overdue', value: 'overdue' },
-  { label: 'Paid', value: 'paid' },
-  { label: 'Partial', value: 'partially_paid' },
-  { label: 'Draft', value: 'draft' },
+const STATUS_TABS: { label: string; value: BillStatus | "" }[] = [
+  { label: "All", value: "" },
+  { label: "Issued", value: "issued" },
+  { label: "Overdue", value: "overdue" },
+  { label: "Paid", value: "paid" },
+  { label: "Partial", value: "partially_paid" },
+  { label: "Draft", value: "draft" },
 ];
 
 const PAGE_SIZE = 25;
@@ -32,11 +36,14 @@ function useDebounce<T>(value: T, delay = 400): T {
 }
 
 function BillRow({ bill }: { bill: Bill }) {
-  const isDue = bill.status === 'overdue';
+  const isDue = bill.status === "overdue";
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50">
       <td className="py-3 px-4">
-        <Link to={`/billing/${bill.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+        <Link
+          to={`/billing/${bill.id}`}
+          className="text-sm font-medium text-blue-700 hover:underline"
+        >
           {bill.bill_number}
         </Link>
       </td>
@@ -47,16 +54,20 @@ function BillRow({ bill }: { bill: Bill }) {
         {bill.lease_info.unit_name} · {bill.lease_info.property_name}
       </td>
       <td className="py-3 px-4 text-sm text-gray-600">
-        {format(new Date(bill.period_start), 'MMM yyyy')}
+        {format(new Date(bill.period_start), "MMM yyyy")}
       </td>
-      <td className={`py-3 px-4 text-sm font-medium ${isDue ? 'text-red-700' : 'text-gray-700'}`}>
-        {format(new Date(bill.due_date), 'dd MMM yyyy')}
+      <td
+        className={`py-3 px-4 text-sm font-medium ${
+          isDue ? "text-red-700" : "text-gray-700"
+        }`}
+      >
+        {format(new Date(bill.due_date), "dd MMM yyyy")}
       </td>
       <td className="py-3 px-4 text-sm font-medium text-gray-900">
-        ₹{Number(bill.total_amount).toLocaleString('en-IN')}
+        ₹{Number(bill.total_amount).toLocaleString("en-IN")}
       </td>
       <td className="py-3 px-4 text-sm text-gray-500">
-        ₹{Number(bill.balance_due).toLocaleString('en-IN')}
+        ₹{Number(bill.balance_due).toLocaleString("en-IN")}
       </td>
       <td className="py-3 px-4">
         <StatusBadge status={bill.status} />
@@ -65,24 +76,33 @@ function BillRow({ bill }: { bill: Bill }) {
   );
 }
 
-function GenerateBillModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function GenerateBillModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const generateBill = useGenerateBill();
-  const { data: leases } = useLeases({ status: 'active' });
-  const [leaseId, setLeaseId] = useState('');
+  const { data: leases } = useLeases({ status: "active" });
+  const [leaseId, setLeaseId] = useState("");
   const [periodDate, setPeriodDate] = useState(() => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
   });
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leaseId) return;
     try {
-      await generateBill.mutateAsync({ lease_id: leaseId, period_date: periodDate });
-      toast.success('Bill generated successfully');
+      await generateBill.mutateAsync({
+        lease_id: leaseId,
+        period_date: periodDate,
+      });
+      toast.success("Bill generated successfully");
       onClose();
     } catch (err: any) {
-      toast.error(err?.response?.data?.detail ?? 'Failed to generate bill');
+      toast.error(err?.response?.data?.detail ?? "Failed to generate bill");
     }
   };
 
@@ -115,8 +135,12 @@ function GenerateBillModal({ open, onClose }: { open: boolean; onClose: () => vo
           required
         />
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button type="submit" loading={generateBill.isPending}>Generate</Button>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={generateBill.isPending}>
+            Generate
+          </Button>
         </div>
       </form>
     </Modal>
@@ -137,23 +161,28 @@ function Pagination({
   const totalPages = Math.ceil(totalCount / pageSize);
   if (totalPages <= 1) return null;
 
-  const pages: (number | '…')[] = [];
+  const pages: (number | "…")[] = [];
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) pages.push(i);
   } else {
     pages.push(1);
-    if (page > 3) pages.push('…');
-    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+    if (page > 3) pages.push("…");
+    for (
+      let i = Math.max(2, page - 1);
+      i <= Math.min(totalPages - 1, page + 1);
+      i++
+    ) {
       pages.push(i);
     }
-    if (page < totalPages - 2) pages.push('…');
+    if (page < totalPages - 2) pages.push("…");
     pages.push(totalPages);
   }
 
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
       <p className="text-sm text-gray-500">
-        Showing {Math.min((page - 1) * pageSize + 1, totalCount)}–{Math.min(page * pageSize, totalCount)} of {totalCount}
+        Showing {Math.min((page - 1) * pageSize + 1, totalCount)}–
+        {Math.min(page * pageSize, totalCount)} of {totalCount}
       </p>
       <div className="flex gap-1">
         <button
@@ -164,21 +193,26 @@ function Pagination({
           Prev
         </button>
         {pages.map((p, i) =>
-          p === '…' ? (
-            <span key={`ellipsis-${i}`} className="px-2 py-1 text-sm text-gray-400">…</span>
+          p === "…" ? (
+            <span
+              key={`ellipsis-${i}`}
+              className="px-2 py-1 text-sm text-gray-400"
+            >
+              …
+            </span>
           ) : (
             <button
               key={p}
               onClick={() => onChange(p as number)}
               className={`px-3 py-1 text-sm rounded border ${
                 p === page
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-200 hover:bg-gray-50'
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-200 hover:bg-gray-50"
               }`}
             >
               {p}
             </button>
-          )
+          ),
         )}
         <button
           onClick={() => onChange(page + 1)}
@@ -195,11 +229,11 @@ function Pagination({
 export default function BillingPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const activeStatus = (searchParams.get('status') ?? '') as BillStatus | '';
-  const searchInput = searchParams.get('search') ?? '';
-  const dueDateGte = searchParams.get('due_date__gte') ?? '';
-  const dueDateLte = searchParams.get('due_date__lte') ?? '';
-  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const activeStatus = (searchParams.get("status") ?? "") as BillStatus | "";
+  const searchInput = searchParams.get("search") ?? "";
+  const dueDateGte = searchParams.get("due_date__gte") ?? "";
+  const dueDateLte = searchParams.get("due_date__lte") ?? "";
+  const page = parseInt(searchParams.get("page") ?? "1", 10);
 
   const [localSearch, setLocalSearch] = useState(searchInput);
   const debouncedSearch = useDebounce(localSearch, 400);
@@ -216,7 +250,7 @@ export default function BillingPage() {
           if (v) next.set(k, v);
           else next.delete(k);
         });
-        next.set('page', '1');
+        next.set("page", "1");
         return next;
       });
     },
@@ -229,9 +263,9 @@ export default function BillingPage() {
     prevDebounced.current = debouncedSearch;
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (debouncedSearch) next.set('search', debouncedSearch);
-      else next.delete('search');
-      next.set('page', '1');
+      if (debouncedSearch) next.set("search", debouncedSearch);
+      else next.delete("search");
+      next.set("page", "1");
       return next;
     });
   }, [debouncedSearch, setSearchParams]);
@@ -265,8 +299,8 @@ export default function BillingPage() {
             onClick={() => updateParam({ status: value })}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeStatus === value
-                ? 'border-blue-600 text-blue-700'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? "border-blue-600 text-blue-700"
+                : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
             {label}
@@ -286,7 +320,9 @@ export default function BillingPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Due from</label>
+          <label className="text-xs text-gray-500 whitespace-nowrap">
+            Due from
+          </label>
           <input
             type="date"
             value={dueDateGte}
@@ -308,11 +344,13 @@ export default function BillingPage() {
             variant="secondary"
             onClick={() => {
               isClearing.current = true;
-              prevDebounced.current = '';
-              setLocalSearch('');
+              prevDebounced.current = "";
+              setLocalSearch("");
               setSearchParams({});
               // Reset flag after debounce delay
-              setTimeout(() => { isClearing.current = false; }, 500);
+              setTimeout(() => {
+                isClearing.current = false;
+              }, 500);
             }}
           >
             Clear filters
@@ -330,7 +368,9 @@ export default function BillingPage() {
         <div className="rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
           <p className="text-gray-500 mb-4">No bills found</p>
           {!activeStatus && !debouncedSearch && !dueDateGte && !dueDateLte && (
-            <Button onClick={() => setShowGenerate(true)}>Generate first bill</Button>
+            <Button onClick={() => setShowGenerate(true)}>
+              Generate first bill
+            </Button>
           )}
         </div>
       )}
@@ -371,7 +411,7 @@ export default function BillingPage() {
             onChange={(p) =>
               setSearchParams((prev) => {
                 const next = new URLSearchParams(prev);
-                next.set('page', String(p));
+                next.set("page", String(p));
                 return next;
               })
             }
@@ -379,7 +419,10 @@ export default function BillingPage() {
         </div>
       )}
 
-      <GenerateBillModal open={showGenerate} onClose={() => setShowGenerate(false)} />
+      <GenerateBillModal
+        open={showGenerate}
+        onClose={() => setShowGenerate(false)}
+      />
     </AppShell>
   );
 }

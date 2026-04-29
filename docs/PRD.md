@@ -3,12 +3,12 @@
 **Product Requirements Document**
 **Version 2.0** · Scale-Ready Architecture · April 2026
 
-| | |
-|---|---|
-| **Author** | Vipin Pandey |
-| **Status** | Draft — architecture review |
-| **Scale Target** | 100K+ landlords, 1M+ tenants, multi-region |
-| **Platform Type** | Multi-tenant B2B2C SaaS |
+|                    |                                                    |
+| ------------------ | -------------------------------------------------- |
+| **Author**         | Vipin Pandey                                       |
+| **Status**         | Draft — architecture review                        |
+| **Scale Target**   | 100K+ landlords, 1M+ tenants, multi-region         |
+| **Platform Type**  | Multi-tenant B2B2C SaaS                            |
 | **Target Release** | MVP in 10–12 weeks, production-hardened by month 6 |
 
 ---
@@ -41,18 +41,18 @@ RentTrack is building the operating system for India's residential and commercia
 
 Start as a modular Django monolith with clearly bounded contexts. Extract to microservices only when a service has genuine scale or team autonomy needs — not prematurely.
 
-| Service / Module | Extract When | Responsibility |
-|---|---|---|
-| **Identity Service** | Month 3 | Auth, JWT, OAuth, RBAC, session management, MFA |
-| **Property Service** | Month 6+ | Properties, units, leases, tenant assignments |
-| **Billing Service** | Month 4 | Bill generation, invoice rules, tax calculation, late fees |
-| **Payments Service** | Month 4 | Gateway integrations, reconciliation, refunds, payouts |
-| **Metering Service** | Month 5 | Meter readings, OCR, consumption analytics, tariff engine |
-| **Notification Service** | Month 3 | Email, SMS, WhatsApp, push — with retry, templating, throttling |
-| **Ticketing Service** | Month 9+ | Maintenance tickets, vendor assignment, SLA tracking |
-| **Document Service** | Month 9+ | S3-backed vault, signed URLs, virus scanning |
-| **Analytics Service** | Month 6 | Aggregated reports, exports, warehouse pipelines |
-| **Admin/BI Service** | Month 9+ | Internal tools, customer support console, fraud detection |
+| Service / Module         | Extract When | Responsibility                                                  |
+| ------------------------ | ------------ | --------------------------------------------------------------- |
+| **Identity Service**     | Month 3      | Auth, JWT, OAuth, RBAC, session management, MFA                 |
+| **Property Service**     | Month 6+     | Properties, units, leases, tenant assignments                   |
+| **Billing Service**      | Month 4      | Bill generation, invoice rules, tax calculation, late fees      |
+| **Payments Service**     | Month 4      | Gateway integrations, reconciliation, refunds, payouts          |
+| **Metering Service**     | Month 5      | Meter readings, OCR, consumption analytics, tariff engine       |
+| **Notification Service** | Month 3      | Email, SMS, WhatsApp, push — with retry, templating, throttling |
+| **Ticketing Service**    | Month 9+     | Maintenance tickets, vendor assignment, SLA tracking            |
+| **Document Service**     | Month 9+     | S3-backed vault, signed URLs, virus scanning                    |
+| **Analytics Service**    | Month 6      | Aggregated reports, exports, warehouse pipelines                |
+| **Admin/BI Service**     | Month 9+     | Internal tools, customer support console, fraud detection       |
 
 ### 3.2 Request Flow (Steady State)
 
@@ -89,10 +89,10 @@ Reads that don't need strict consistency hit Redis cache first, then read replic
 
 Three isolation tiers to serve different customer segments:
 
-| Tier | Isolation | Who it's for |
-|---|---|---|
-| **Shared (Free/Pro)** | Shared DB, row-level security via `organization_id` | Solo landlords, small PMCs up to 500 units |
-| **Pooled (Business)** | Shared cluster, dedicated schema per org | Mid-market PMCs, 500–5000 units |
+| Tier                       | Isolation                                                     | Who it's for                                        |
+| -------------------------- | ------------------------------------------------------------- | --------------------------------------------------- |
+| **Shared (Free/Pro)**      | Shared DB, row-level security via `organization_id`           | Solo landlords, small PMCs up to 500 units          |
+| **Pooled (Business)**      | Shared cluster, dedicated schema per org                      | Mid-market PMCs, 500–5000 units                     |
 | **Dedicated (Enterprise)** | Dedicated DB instance + Redis namespace, optional VPC peering | Large PMCs, 5000+ units, compliance-heavy customers |
 
 - **Tenant context middleware:** Every request carries `organization_id` in JWT. Middleware sets Postgres session variable `app.current_org`, and RLS policies enforce isolation.
@@ -172,19 +172,19 @@ The billing engine is the heart of the platform. It must be deterministic, audit
 
 ## 6. Performance Targets & SLOs
 
-| Metric | Target | Measured At |
-|---|---|---|
-| API availability | 99.95% | Per region, 30-day rolling |
-| API latency p50 | < 80ms | Gateway → response |
-| API latency p95 | < 200ms | Gateway → response |
-| API latency p99 | < 500ms | Gateway → response |
-| Bill generation throughput | 10K bills/min | Per worker cluster |
-| Notification send latency | < 30 sec from event | p95 |
-| Payment webhook → reconciled | < 10 sec | p95 |
-| Dashboard load | < 1.5 sec | First contentful paint |
-| Report (async) turnaround | < 5 min | p95 for <100K rows |
-| RPO (Recovery Point) | ≤ 5 minutes | Managed DB backups + WAL |
-| RTO (Recovery Time) | ≤ 30 minutes | Full region failover |
+| Metric                       | Target              | Measured At                |
+| ---------------------------- | ------------------- | -------------------------- |
+| API availability             | 99.95%              | Per region, 30-day rolling |
+| API latency p50              | < 80ms              | Gateway → response         |
+| API latency p95              | < 200ms             | Gateway → response         |
+| API latency p99              | < 500ms             | Gateway → response         |
+| Bill generation throughput   | 10K bills/min       | Per worker cluster         |
+| Notification send latency    | < 30 sec from event | p95                        |
+| Payment webhook → reconciled | < 10 sec            | p95                        |
+| Dashboard load               | < 1.5 sec           | First contentful paint     |
+| Report (async) turnaround    | < 5 min             | p95 for <100K rows         |
+| RPO (Recovery Point)         | ≤ 5 minutes         | Managed DB backups + WAL   |
+| RTO (Recovery Time)          | ≤ 30 minutes        | Full region failover       |
 
 ---
 
@@ -293,33 +293,33 @@ The billing engine is the heart of the platform. It must be deterministic, audit
 
 Scale requires team structure. Proposed org after 18 months:
 
-| Team | Headcount | Owns |
-|---|---|---|
-| Platform / Infra | 3–4 | Kubernetes, CI/CD, observability, security, DB |
-| Identity & Access | 2–3 | Auth, RBAC, SSO, MFA, audit |
-| Billing & Payments | 4–5 | Billing engine, payment gateways, reconciliation, taxes |
-| Notifications & Comms | 2–3 | Multi-channel delivery, templating, deliverability |
-| Tenant Experience | 3–4 | Tenant app, meter readings, tickets, document vault |
-| Landlord Experience | 3–4 | Landlord dashboard, reports, bulk ops, PMC workflows |
-| Data & Analytics | 2–3 | Warehouse, BI, ML for anomaly detection |
-| SRE / On-call | 2 | Incident response, runbooks, DR drills |
-| QA / Automation | 2 | E2E tests, load testing, chaos engineering |
+| Team                  | Headcount | Owns                                                    |
+| --------------------- | --------- | ------------------------------------------------------- |
+| Platform / Infra      | 3–4       | Kubernetes, CI/CD, observability, security, DB          |
+| Identity & Access     | 2–3       | Auth, RBAC, SSO, MFA, audit                             |
+| Billing & Payments    | 4–5       | Billing engine, payment gateways, reconciliation, taxes |
+| Notifications & Comms | 2–3       | Multi-channel delivery, templating, deliverability      |
+| Tenant Experience     | 3–4       | Tenant app, meter readings, tickets, document vault     |
+| Landlord Experience   | 3–4       | Landlord dashboard, reports, bulk ops, PMC workflows    |
+| Data & Analytics      | 2–3       | Warehouse, BI, ML for anomaly detection                 |
+| SRE / On-call         | 2         | Incident response, runbooks, DR drills                  |
+| QA / Automation       | 2         | E2E tests, load testing, chaos engineering              |
 
 ---
 
 ## 12. Phased Rollout Plan
 
-| Phase | Timeline | Milestones |
-|---|---|---|
-| **Phase 0: Foundation** | Month 1–2 | IaC, CI/CD, Kubernetes, Postgres, Redis, observability stack, auth service, organizations model, multi-tenancy enforcement |
-| **Phase 1: MVP** | Month 2–3 | Properties, units, leases, tenant invite, rent billing, basic notifications (email), manual payment recording |
-| **Phase 2: Meter + SMS** | Month 3–4 | Electricity module, photo upload, SMS via MSG91, notification preferences, in-app feed |
-| **Phase 3: Payments** | Month 4–5 | Razorpay integration, auto-reconciliation, receipts, UPI AutoPay, refunds |
-| **Phase 4: Scale Hardening** | Month 5–6 | Load testing to 10K concurrent users, partition critical tables, read replicas, CDN, WAF, SOC 2 prep |
-| **Phase 5: PMC Features** | Month 6–8 | Bulk operations, multi-property dashboards, roles/permissions, API for PMCs, webhooks |
-| **Phase 6: Enterprise** | Month 8–12 | SSO, dedicated tier, custom SLAs, white-labeling, audit exports, SOC 2 Type II |
-| **Phase 7: Geographic Expansion** | Month 12–18 | Multi-region active-active, SEA/ME localization, multi-currency, VAT engine |
-| **Phase 8: Platform** | Month 18–24 | Public API marketplace, third-party app ecosystem, AI copilot for landlords |
+| Phase                             | Timeline    | Milestones                                                                                                                 |
+| --------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 0: Foundation**           | Month 1–2   | IaC, CI/CD, Kubernetes, Postgres, Redis, observability stack, auth service, organizations model, multi-tenancy enforcement |
+| **Phase 1: MVP**                  | Month 2–3   | Properties, units, leases, tenant invite, rent billing, basic notifications (email), manual payment recording              |
+| **Phase 2: Meter + SMS**          | Month 3–4   | Electricity module, photo upload, SMS via MSG91, notification preferences, in-app feed                                     |
+| **Phase 3: Payments**             | Month 4–5   | Razorpay integration, auto-reconciliation, receipts, UPI AutoPay, refunds                                                  |
+| **Phase 4: Scale Hardening**      | Month 5–6   | Load testing to 10K concurrent users, partition critical tables, read replicas, CDN, WAF, SOC 2 prep                       |
+| **Phase 5: PMC Features**         | Month 6–8   | Bulk operations, multi-property dashboards, roles/permissions, API for PMCs, webhooks                                      |
+| **Phase 6: Enterprise**           | Month 8–12  | SSO, dedicated tier, custom SLAs, white-labeling, audit exports, SOC 2 Type II                                             |
+| **Phase 7: Geographic Expansion** | Month 12–18 | Multi-region active-active, SEA/ME localization, multi-currency, VAT engine                                                |
+| **Phase 8: Platform**             | Month 18–24 | Public API marketplace, third-party app ecosystem, AI copilot for landlords                                                |
 
 ---
 
@@ -327,16 +327,16 @@ Scale requires team structure. Proposed org after 18 months:
 
 ### 13.1 Infrastructure Cost per 1K Active Tenants (Estimated)
 
-| Item | Monthly Cost |
-|---|---|
-| Compute (EKS) | ~$30 |
-| Database (RDS Postgres multi-AZ) | ~$40 |
-| Cache (Redis) | ~$15 |
-| Storage (S3 + CDN) | ~$10 |
-| Observability (logs + metrics + traces) | ~$20 |
-| Notifications (avg 15 sends/tenant/month) | ~$60 |
-| **Total fixed infra** | **~$175 / 1K tenants** |
-| **Per tenant** | **$0.175 (infra) + $0.06 (notifications)** |
+| Item                                      | Monthly Cost                               |
+| ----------------------------------------- | ------------------------------------------ |
+| Compute (EKS)                             | ~$30                                       |
+| Database (RDS Postgres multi-AZ)          | ~$40                                       |
+| Cache (Redis)                             | ~$15                                       |
+| Storage (S3 + CDN)                        | ~$10                                       |
+| Observability (logs + metrics + traces)   | ~$20                                       |
+| Notifications (avg 15 sends/tenant/month) | ~$60                                       |
+| **Total fixed infra**                     | **~$175 / 1K tenants**                     |
+| **Per tenant**                            | **$0.175 (infra) + $0.06 (notifications)** |
 
 Payment gateway fees (~2% of GMV) are pass-through, not infra.
 
@@ -352,13 +352,13 @@ Payment gateway fees (~2% of GMV) are pass-through, not infra.
 
 ## 14. Risks at Scale
 
-- **Notification cost explosion.** *Mitigation:* smart channel selection, quiet hours, in-app first, SMS only for critical events.
-- **Multi-tenant data leak.** *Mitigation:* RLS at DB layer, automated tests for tenant isolation in every PR, pen tests.
-- **Database hot-spotting on large PMCs.** *Mitigation:* identify top 1% tenants early, move to Business/Enterprise tier with dedicated resources.
-- **Payment gateway failure.** *Mitigation:* multi-gateway routing, manual reconciliation fallback, clear customer comms.
-- **Regulatory shifts (DPDP, rent control).** *Mitigation:* modular compliance layer, legal advisor on retainer, quarterly review.
-- **Talent scaling.** *Mitigation:* hire platform + SRE early (month 4+), invest in docs + onboarding.
-- **Migration pain at 10M+ users.** *Mitigation:* design for sharding from day one (`organization_id` in every key), test partition splits quarterly.
+- **Notification cost explosion.** _Mitigation:_ smart channel selection, quiet hours, in-app first, SMS only for critical events.
+- **Multi-tenant data leak.** _Mitigation:_ RLS at DB layer, automated tests for tenant isolation in every PR, pen tests.
+- **Database hot-spotting on large PMCs.** _Mitigation:_ identify top 1% tenants early, move to Business/Enterprise tier with dedicated resources.
+- **Payment gateway failure.** _Mitigation:_ multi-gateway routing, manual reconciliation fallback, clear customer comms.
+- **Regulatory shifts (DPDP, rent control).** _Mitigation:_ modular compliance layer, legal advisor on retainer, quarterly review.
+- **Talent scaling.** _Mitigation:_ hire platform + SRE early (month 4+), invest in docs + onboarding.
+- **Migration pain at 10M+ users.** _Mitigation:_ design for sharding from day one (`organization_id` in every key), test partition splits quarterly.
 
 ---
 
@@ -375,4 +375,4 @@ Payment gateway fees (~2% of GMV) are pass-through, not infra.
 
 ---
 
-*End of document. Raise issues or comments directly on this file.*
+_End of document. Raise issues or comments directly on this file._
